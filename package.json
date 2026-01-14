@@ -1,0 +1,29 @@
+{
+  "name": "arbiter",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "generate": "pnpm --filter @arbiter/db generate",
+    "migrate": "pnpm --filter @arbiter/db migrate",
+    "push": "pnpm --filter @arbiter/db push",
+    "studio": "pnpm --filter @arbiter/db studio",
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.27.0",
+  "devDependencies": {
+    "@types/node": "^24.10.7",
+    "nodemon": "^3.1.11",
+    "prisma": "~6.19.2",
+    "ts-node": "^10.9.2",
+    "turbo": "^2.7.4",
+    "typescript": "~5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "zod": "^4.3.5"
+  }
+}

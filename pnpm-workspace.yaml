@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Add this section to properly handle Prisma
+packageExtensions:
+  "@prisma/client@*":
+    peerDependencies:
+      prisma: "*"
+  prisma@*:
+    peerDependencies:
+      "@prisma/client": "*"

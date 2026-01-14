@@ -1,0 +1,213 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  wallet   String  @unique
+  username String
+  bias     String?
+  email    String?
+
+  memberships     Membership[] //one to many
+  proposaldata    ProposalData[] //one to many
+  votes           Vote[]
+  discussions     Discussion[]
+  discussionVotes DiscussionVote[]
+  messages        Message[]
+
+  createdAt DateTime @default(now())
+}
+
+model Organization {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  root        String
+  context     String
+
+  memberships Membership[] //many to many
+  proposals   Proposal[] //one to many
+
+  createdAt DateTime @default(now())
+}
+
+model Membership {
+  id     String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId String     @db.ObjectId
+  orgId  String     @db.ObjectId
+  root   String     @unique
+  role   MemberRole @default(CREATOR)
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade) //one to many
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, orgId])
+  @@index([orgId])
+}
+
+enum MemberRole {
+  CREATOR
+  ADMIN
+  MEMBER
+}
+
+model Proposal {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  media          String
+  summary        String
+  proposalStatus ProposalStatus @default(UPCOMING)
+  deadline       DateTime
+  orgId          String         @db.ObjectId
+
+  org             Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade) //one to many
+  proposaldata    ProposalData[] //one to many
+  votes           Vote[]
+  proposalChoices ProposalChoice[]
+  proposalResult  ProposalResult?
+  discussions     Discussion[]
+  messages        Message[]
+
+  createdAt DateTime @default(now())
+
+  @@index([orgId])
+}
+
+enum ProposalStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+model ProposalData {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  summary    String
+  vote       String
+  userId     String @db.ObjectId
+  proposalId String @db.ObjectId
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade) //one to many
+
+  @@unique([userId, proposalId])
+}
+
+model ProposalChoice {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  proposalId String @db.ObjectId
+
+  value String
+
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  votes    Vote[]
+
+  @@unique([proposalId, value])
+  @@index([proposalId])
+}
+
+model Vote {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  proposalId String @db.ObjectId
+  choiceId   String @db.ObjectId
+  userId     String @db.ObjectId
+
+  signature String
+  hash      String?
+
+  votedAt DateTime @default(now())
+
+  proposal Proposal       @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  choice   ProposalChoice @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([proposalId, userId])
+  @@index([proposalId])
+  @@index([choiceId])
+}
+
+model ProposalResult {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  proposalId String @unique @db.ObjectId
+
+  totalVotes      Int
+  winningChoiceId String @db.ObjectId
+
+  finalizedAt DateTime @default(now())
+
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  author     Author @default(AI)
+  text       String
+  userId     String @db.ObjectId
+  proposalId String @db.ObjectId
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([proposalId, userId])
+}
+
+enum Author {
+  USER
+  AI
+}
+
+model Discussion {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  text       String
+  parentId   String? @db.ObjectId
+  userId     String  @db.ObjectId
+  proposalId String  @db.ObjectId
+
+  parent          Discussion?      @relation("DiscussionThread", fields: [parentId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  proposal        Proposal         @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  discussionVotes DiscussionVote[]
+  replies         Discussion[]     @relation("DiscussionThread")
+
+  createdAt DateTime @default(now())
+
+  @@index([proposalId])
+  @@index([parentId])
+}
+
+model DiscussionVote {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  discussionId String             @db.ObjectId
+  userId       String             @db.ObjectId
+  type         DiscussionVoteType
+
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([discussionId, userId])
+  @@index([discussionId])
+}
+
+enum DiscussionVoteType {
+  UP
+  DOWN
+}

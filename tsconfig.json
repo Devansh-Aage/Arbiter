@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@prisma/client": ["./prisma/generated/client"],
+      "@tether/db": ["./packages/db/src/index.ts"]
+    }
+  }
+}

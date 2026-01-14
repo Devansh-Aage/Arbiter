@@ -1,0 +1,22 @@
+{
+  "name": "@arbiter/db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "generate": "prisma generate --schema=schema.prisma",
+    "migrate": "prisma migrate dev",
+    "push": "prisma db push",
+    "studio": "prisma studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.27.0",
+  "dependencies": {
+    "@prisma/client": "~6.19.2"
+  },
+  "devDependencies": {
+    "prisma": "~6.19.2"
+  }
+}
