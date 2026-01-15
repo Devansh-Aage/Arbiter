@@ -35,8 +35,8 @@ model Organization {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
-  root        String
-  context     String
+  memberRoot  String
+  context     String  
 
   memberships Membership[] //many to many
   proposals   Proposal[] //one to many
@@ -45,11 +45,12 @@ model Organization {
 }
 
 model Membership {
-  id     String     @id @default(auto()) @map("_id") @db.ObjectId
-  userId String     @db.ObjectId
-  orgId  String     @db.ObjectId
-  root   String     @unique
-  role   MemberRole @default(CREATOR)
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String     @db.ObjectId
+  orgId      String     @db.ObjectId
+  root       String     @unique
+  role       MemberRole @default(CREATOR)
+  voteWeight Int        @default(1)
 
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many
   org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade) //one to many
@@ -129,6 +130,7 @@ model Vote {
 
   signature String
   hash      String?
+  msgHash   String
 
   votedAt DateTime @default(now())
 
@@ -145,6 +147,7 @@ model ProposalResult {
   id         String @id @default(auto()) @map("_id") @db.ObjectId
   proposalId String @unique @db.ObjectId
 
+  voteRoot        String //merkle root
   totalVotes      Int
   winningChoiceId String @db.ObjectId
 
