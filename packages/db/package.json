@@ -2,7 +2,8 @@
   "name": "@arbiter/db",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "generate": "prisma generate --schema=./prisma/schema.prisma",
     "migrate": "prisma migrate dev",

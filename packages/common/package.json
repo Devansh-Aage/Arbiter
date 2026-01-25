@@ -1,0 +1,19 @@
+{
+  "name": "@arbiter/common",
+  "version": "1.0.0",
+  "description": "Shared types and utility functions for the monorepo",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.27.0",
+  "dependencies": {
+    "@arbiter/db": "workspace:^1.0.0",
+    "viem": "^2.45.0"
+  }
+}

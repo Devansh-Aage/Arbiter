@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "dev:web": "pnpm --filter web dev",
+    "dev:http": "pnpm --filter http dev",
     "generate": "pnpm --filter @arbiter/db generate",
     "migrate": "pnpm --filter @arbiter/db migrate",
     "push": "pnpm --filter @arbiter/db push",

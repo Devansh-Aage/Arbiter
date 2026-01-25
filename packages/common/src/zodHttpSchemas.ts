@@ -1,0 +1,19 @@
+import { z } from "zod";
+import { isAddress } from "viem";
+
+export const signinUser = z.object({
+  email: z.email("Please enter a valid Email"),
+  wallet: z.custom<string>(isAddress, "Invalid Address"),
+});
+
+export const createOrgValidation = z.object({
+  identityCommitment: z.bigint("Identity Commitment must be a big number."),
+  name: z
+    .string()
+    .min(3, "Name must have atleast 3 characters")
+    .max(50, "Name too long!"),
+  description: z
+    .string()
+    .min(10, "The description must be at least 50 characters long")
+    .max(1500, "Description too long!"),
+});
