@@ -16,7 +16,7 @@ datasource db {
 
 model User {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  wallet   String?  @unique
+  wallet   String? @unique
   username String?
   bias     String?
   email    String
@@ -35,8 +35,8 @@ model Organization {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
-  memberRoot  String
-  context     String  
+  memberRoot  String //semaphore group root
+  context     String
 
   memberships Membership[] //many to many
   proposals   Proposal[] //one to many
@@ -45,12 +45,14 @@ model Organization {
 }
 
 model Membership {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String     @db.ObjectId
-  orgId      String     @db.ObjectId
-  root       String     @unique //seed= orgId+ userId
-  role       MemberRole @default(CREATOR)
-  voteWeight Int        @default(1)
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String     @db.ObjectId
+  orgId              String     @db.ObjectId
+  root               String     @unique //seed= orgId+ userId
+  role               MemberRole @default(CREATOR)
+  voteWeight         Int        @default(1)
+  identityCommitment String     @unique
+  leafIndex          Int
 
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many
   org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade) //one to many
@@ -70,11 +72,13 @@ enum MemberRole {
 model Proposal {
   id             String         @id @default(auto()) @map("_id") @db.ObjectId
   title          String
-  mediaUrl          String
+  mediaUrl       String
   deadline       DateTime
   summary        String
   proposalStatus ProposalStatus @default(UPCOMING)
   orgId          String         @db.ObjectId
+  voterRoot      String? //semaphore group root
+  type           ProposalType   @default(TRANSPARENT)
 
   org             Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade) //one to many
   proposaldata    ProposalData[] //one to many
@@ -83,10 +87,16 @@ model Proposal {
   proposalResult  ProposalResult?
   discussions     Discussion[]
   messages        Message[]
+  zkVotes         zkVote[]
 
   createdAt DateTime @default(now())
 
   @@index([orgId])
+}
+
+enum ProposalType {
+  TRANSPARENT
+  ANONYMOUS
 }
 
 enum ProposalStatus {
@@ -117,6 +127,7 @@ model ProposalChoice {
 
   proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
   votes    Vote[]
+  zkVotes  zkVote[]
 
   @@unique([proposalId, value])
   @@index([proposalId])
@@ -131,7 +142,7 @@ model Vote {
 
   signature String
   hash      String?
-  msgHash   String
+  msgHash   String // this msg was signed by pvt key so we can verify the sign 
 
   votedAt DateTime @default(now())
 
@@ -140,6 +151,22 @@ model Vote {
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([proposalId, userId])
+  @@index([proposalId])
+  @@index([choiceId])
+}
+
+model zkVote {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  proposalId    String @db.ObjectId
+  choiceId      String @db.ObjectId
+  nullifierHash String //derived from generateProof 
+  zkProof       String //derived from generateProof 
+
+  proposal Proposal       @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  choice   ProposalChoice @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+
+  @@unique([proposalId, nullifierHash])
   @@index([proposalId])
   @@index([choiceId])
 }

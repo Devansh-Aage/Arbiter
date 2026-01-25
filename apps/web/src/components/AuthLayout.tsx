@@ -18,7 +18,7 @@ const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
 
   return (
     <div className="font-nunito h-screen w-full bg-light-bg dark:bg-dark-bg">
-      <p className="text-3xl font-medium pt-5 pl-5"> Tether</p>
+      <p className="text-3xl font-medium pt-5 pl-5">Arbiter</p>
       <div className="mt-20 flex justify-center">{children}</div>
     </div>
   );
