@@ -22,7 +22,7 @@ export const createOrg: RequestHandler = async (req, res) => {
 
     const group = new Group();
     group.addMember(identityCommitment);
-    const memberRoot = group.root;
+    const memberRoot = group.root.toString();
 
     const org = await prisma.organization.create({
       data: {
@@ -64,6 +64,10 @@ export const getOrgOfUser: RequestHandler = async (req, res) => {
           some: { userId: user.id },
         },
       },
+      include: {
+        memberships: true,
+        proposals: true,
+      }
     });
     if (orgs.length === 0) {
       res.status(404).json({ message: "No organizations found for user" });

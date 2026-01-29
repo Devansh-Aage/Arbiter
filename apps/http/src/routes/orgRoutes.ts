@@ -1,7 +1,7 @@
 import express from "express";
 import { rateLimit } from "express-rate-limit";
 import { isLoggedIn } from "../middleware/isLoggedIn";
-import { createOrg } from "../controller/orgController";
+import { createOrg, getOrgById, getOrgOfUser } from "../controller/orgController";
 
 const router = express.Router();
 
@@ -19,5 +19,7 @@ const limiter = rateLimit({
 });
 
 router.post("/create", limiter, isLoggedIn, createOrg);
+router.get("/", isLoggedIn, getOrgOfUser);
+router.get("/:id", isLoggedIn, getOrgById);
 
 export default router;

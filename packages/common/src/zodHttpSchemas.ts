@@ -8,7 +8,7 @@ export const signinUser = z.object({
 });
 
 export const createOrgValidation = z.object({
-  identityCommitment: z.bigint("Identity Commitment must be a big number."),
+  identityCommitment: z.string("Must be a string"),
   name: z
     .string()
     .min(3, "Name must have atleast 3 characters")

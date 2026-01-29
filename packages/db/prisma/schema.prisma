@@ -35,7 +35,7 @@ model Organization {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
-  memberRoot  BigInt //semaphore group root
+  memberRoot  String //semaphore group root
   context     String
 
   memberships Membership[] //many to many
@@ -50,7 +50,7 @@ model Membership {
   orgId              String     @db.ObjectId
   role               MemberRole @default(MEMBER)
   voteWeight         Int        @default(1)
-  identityCommitment BigInt     @unique
+  identityCommitment String     @unique
   leafIndex          Int
 
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many
