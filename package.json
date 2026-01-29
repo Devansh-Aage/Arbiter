@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.27.0",
+  "packageManager": "pnpm@10.28.1",
   "devDependencies": {
     "@types/node": "^24.10.7",
     "nodemon": "^3.1.11",

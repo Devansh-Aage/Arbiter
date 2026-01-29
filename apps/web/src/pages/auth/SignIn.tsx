@@ -1,27 +1,34 @@
 import {
+  useCurrentUser,
   useSignInWithEmail,
   useSignInWithOAuth,
   useVerifyEmailOTP,
 } from "@coinbase/cdp-hooks";
 import { useState, type FunctionComponent } from "react";
-import { useNavigate } from "react-router";
-import { cn } from "@/lib/utils";
 import AuthLayout from "@/components/AuthLayout";
+import InputArbiter from "@/components/ui/InputArbiter";
+import { Button } from "@/components/ui/button";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
-interface SignInProps {}
+interface SignInProps { }
 
 const SignIn: FunctionComponent<SignInProps> = () => {
   const { signInWithEmail } = useSignInWithEmail();
   const { verifyEmailOTP } = useVerifyEmailOTP();
   const { signInWithOAuth } = useSignInWithOAuth();
-  const navigate = useNavigate();
   const [flowId, setFlowId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEmailLoginActive, setIsEmailLoginActive] = useState(false);
-
+  const { fetchToken } = useAuth();
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
@@ -56,16 +63,12 @@ const SignIn: FunctionComponent<SignInProps> = () => {
     setError(null);
     try {
       // Complete sign in
-      const { user, isNewUser } = await verifyEmailOTP({
+      await verifyEmailOTP({
         flowId,
         otp: otp.trim(),
       });
-
-      console.log("Signed in user:", user);
-      console.log("Is new user:", isNewUser);
-
-      // Redirect to Dashboard after successful sign in
-      navigate("/dashboard");
+      await fetchToken();
+      toast.success("Logged in Arbiter");
     } catch (error) {
       console.error("Sign in failed:", error);
       setError("Invalid OTP. Please try again.");
@@ -74,20 +77,15 @@ const SignIn: FunctionComponent<SignInProps> = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     // User will be redirected to Google to complete their login
     void signInWithOAuth("google");
 
-    // Post-login, they will be redirected back to your app, and the login process
-    // will be completed automatically.
   };
 
-  const handleXSignIn = () => {
+  const handleXSignIn = async () => {
     // User will be redirected to X to complete their login
     void signInWithOAuth("x");
-
-    // Post-login, they will be redirected back to your app, and the login process
-    // will be completed automatically.
   };
 
   return (
@@ -111,40 +109,16 @@ const SignIn: FunctionComponent<SignInProps> = () => {
             {/* Email Sign In Form */}
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
+                <InputArbiter
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className={cn(
-                    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-                    "file:border-0 file:bg-transparent file:text-sm file:font-medium",
-                    "placeholder:text-muted-foreground",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "disabled:cursor-not-allowed disabled:opacity-50"
-                  )}
-                  disabled={isLoading}
+                  onChange={(e) => setEmail(e.currentTarget.value)}
+                  htmlFor="email"
+                  title="Email"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={cn(
-                  "w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  "disabled:pointer-events-none disabled:opacity-50",
-                  "h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                )}
-              >
+              <Button type="submit" disabled={isLoading} className="w-full">
                 {isLoading ? "Sending..." : "Sign In with Email"}
-              </button>
+              </Button>
             </form>
 
             <div className="relative">
@@ -159,32 +133,22 @@ const SignIn: FunctionComponent<SignInProps> = () => {
             </div>
 
             {/* Google Sign In */}
-            <button
+            <Button
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className={cn(
-                "w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                "disabled:pointer-events-none disabled:opacity-50",
-                "h-10 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-              )}
+              className="w-full"
             >
               Sign In with Google
-            </button>
+            </Button>
 
             {/* X Sign In */}
-            <button
+            <Button
+              className="w-full"
               onClick={handleXSignIn}
               disabled={isLoading}
-              className={cn(
-                "w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                "disabled:pointer-events-none disabled:opacity-50",
-                "h-10 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-              )}
             >
               Sign In with X
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -204,38 +168,28 @@ const SignIn: FunctionComponent<SignInProps> = () => {
                 >
                   Enter OTP
                 </label>
-                <input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter verification code"
+                <InputOTP
                   maxLength={6}
-                  className={cn(
-                    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-                    "file:border-0 file:bg-transparent file:text-sm file:font-medium",
-                    "placeholder:text-muted-foreground",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "disabled:cursor-not-allowed disabled:opacity-50"
-                  )}
-                  disabled={isLoading}
-                />
+                  value={otp}
+                  onChange={(e) => setOtp(e)}
+                  className="w-full"
+                >
+                  <InputOTPGroup className="w-full flex-1">
+                    <InputOTPSlot className="w-full flex-1" index={0} />
+                    <InputOTPSlot className="w-full flex-1" index={1} />
+                    <InputOTPSlot className="w-full flex-1" index={2} />
+                    <InputOTPSlot className="w-full flex-1" index={3} />
+                    <InputOTPSlot className="w-full flex-1" index={4} />
+                    <InputOTPSlot className="w-full flex-1" index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
               </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={cn(
-                  "w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  "disabled:pointer-events-none disabled:opacity-50",
-                  "h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                )}
-              >
+              <Button type="submit" disabled={isLoading} className="w-full">
                 {isLoading ? "Verifying..." : "Verify OTP"}
-              </button>
+              </Button>
             </form>
 
-            <button
+            <Button
               onClick={() => {
                 setIsEmailLoginActive(false);
                 setFlowId(null);
@@ -243,13 +197,10 @@ const SignIn: FunctionComponent<SignInProps> = () => {
                 setError(null);
               }}
               disabled={isLoading}
-              className={cn(
-                "w-full text-sm text-muted-foreground hover:text-foreground transition-colors",
-                "disabled:opacity-50"
-              )}
+              className="w-full mt-5"
             >
               Use a different email
-            </button>
+            </Button>
           </div>
         )}
       </div>

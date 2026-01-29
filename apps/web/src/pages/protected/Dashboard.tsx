@@ -1,13 +1,35 @@
 import { useSignOut } from "@coinbase/cdp-hooks";
 import { useCurrentUser } from "@coinbase/cdp-hooks";
+import { useQuery } from "@tanstack/react-query";
 import type { FunctionComponent } from "react";
+import axios from "axios";
+import { type User } from "@arbiter/db/src/types";
+import { useAuth } from "@/context/AuthContext";
 
 interface DashboardProps { }
 
 const Dashboard: FunctionComponent<DashboardProps> = () => {
   const { currentUser } = useCurrentUser();
   const { signOut } = useSignOut();
-  console.log(currentUser);
+  const { token, isAuthLoading } = useAuth();
+  const { data: userData, isLoading: isUserDataLoading } = useQuery({
+    queryKey: ["userData"],
+    queryFn: async (): Promise<{ user: User }> => {
+      const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}auth/user`, {
+        headers: {
+          "authToken": token
+        }
+      });
+      return res.data
+    },
+    enabled: !!token
+  })
+  console.log(userData?.user);
+
+  if (isUserDataLoading || isAuthLoading) {
+    return <div>Loading...</div>
+  }
+
 
   return (
     <div>
