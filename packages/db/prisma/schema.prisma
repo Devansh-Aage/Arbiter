@@ -50,7 +50,7 @@ model Membership {
   orgId              String     @db.ObjectId
   role               MemberRole @default(MEMBER)
   voteWeight         Int        @default(1)
-  identityCommitment String     @unique
+  identityCommitment String     
   leafIndex          Int
 
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many

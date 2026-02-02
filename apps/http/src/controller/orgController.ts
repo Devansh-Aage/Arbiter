@@ -95,6 +95,10 @@ export const getOrgById: RequestHandler = async (req, res) => {
     const { id } = validation.data;
     const org = await prisma.organization.findUnique({
       where: { id: id.toString() },
+      include: {
+        memberships: true,
+        proposals: true,
+      }
     });
     if (!org) {
       res.status(404).json({ message: "Organization not found" });
@@ -106,5 +110,16 @@ export const getOrgById: RequestHandler = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error occurred getting org by id" });
+  }
+}
+
+export const addMember: RequestHandler = async (req, res) => {
+  try {
+
+  } catch (error) {
+    console.error("Error occurred adding member", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred adding member" });
   }
 }

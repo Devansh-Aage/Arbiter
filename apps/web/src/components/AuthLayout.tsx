@@ -18,7 +18,7 @@ const AuthLayout: FC<AuthLayoutProps> = ({ children }) => {
 
 
   if (isSignedIn) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/dashboard/orgs" replace />;
   }
 
   return (

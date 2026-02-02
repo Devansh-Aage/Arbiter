@@ -15,7 +15,7 @@ const SideLink: FC<SideLinkProps> = ({ icon, text, to }) => {
     return (
         <Tooltip>
             <TooltipTrigger>
-                <NavLink to={to} className={({ isActive }) => `relative size-10 flex items-center justify-center hover:opacity-85 rounded-md ${isActive ? "dark:bg-cyan-400 bg-cyan-950 text-white" : "dark:bg-cyan-800 bg-cyan-700 text-slate-200"}`}>
+                <NavLink to={to} className={({ isActive }) => `relative size-10 flex items-center justify-center hover:opacity-85 rounded-md ${isActive ? "bg-primary text-white" : "bg-purple-900 text-slate-300"}`}>
                     {icon}
                 </NavLink>
             </TooltipTrigger>

@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import type { FunctionComponent } from "react";
 import { useState } from "react";
@@ -7,7 +7,6 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -17,41 +16,48 @@ import InputArbiter from "@/components/ui/InputArbiter";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { sha256 } from 'hash-wasm';
-import type { User } from "@arbiter/db/src/types";
 import { Identity } from "@semaphore-protocol/identity"
-
+import { useCurrentUser } from "@coinbase/cdp-hooks";
+import { toViemAccount } from "@coinbase/cdp-core";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createOrgClientValidation } from "@arbiter/common";
+import { z } from "zod";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateOrgProps { }
+type FormData = z.infer<typeof createOrgClientValidation>;
 
 const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
     const { token } = useAuth();
     const [open, setOpen] = useState(false);
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
     const queryClient = useQueryClient();
+    const { currentUser } = useCurrentUser()
+    const { userId } = useAuth()
 
-    const { data: userData, isLoading: isUserDataLoading } = useQuery({
-        queryKey: ["userData"],
-        queryFn: async (): Promise<{ user: User }> => {
-            const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}auth/user`, {
-                headers: {
-                    "authToken": token
-                }
-            });
-            return res.data
-        },
-        enabled: !!token
-    })
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setError,
+        formState: { errors, isSubmitting },
+    } = useForm<FormData>({
+        resolver: zodResolver(createOrgClientValidation),
+    });
 
-    const createOrgMutation = useMutation({
+
+
+    const createOrg = useMutation({
         mutationFn: async (data: { name: string; description: string }) => {
-            if (!userData?.user?.id) {
+            if (!userId) {
                 throw new Error("User data not loaded");
             }
+            const evmAccount = currentUser?.evmAccountObjects?.[0]?.address;
+            const viemAccount = await toViemAccount(evmAccount as `0x${string}`);
 
-            const seed = userData.user.id + "arbiter";
-            const hash = await sha256(seed);
+            const seed = userId + "arbiter";
+            const signature = await viemAccount.signMessage({ message: seed });
+            const hash = await sha256(signature);
             const identity = new Identity(hash)
             const identityCommitment = identity.commitment
 
@@ -70,46 +76,28 @@ const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
             );
             return res.data;
         },
+        onError: (err: any) => {
+            if (err instanceof z.ZodError) {
+                setError("name", { message: err.message });
+                setError("description", { message: err.message });
+                return;
+            }
+            else {
+                console.error("Failed to create milestone: ", err)
+                toast.error("An unexpected error occurred!")
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['orgs'] })
+        },
         onSuccess: () => {
-            toast.success("Organization created successfully!");
-            queryClient.invalidateQueries({ queryKey: ["orgs"] });
-            setOpen(false);
-            setName("");
-            setDescription("");
-            setErrors({});
-        },
-        onError: (error: any) => {
-            console.error("Create org error:", error);
-            const errorMessage = error.response?.data?.message || error.message || "Failed to create organization";
-            toast.error(errorMessage);
-        },
+            reset();
+            setOpen(false)
+        }
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // Client-side validation
-        const newErrors: { name?: string; description?: string } = {};
-
-        if (!name || name.length < 3) {
-            newErrors.name = "Name must have at least 3 characters";
-        } else if (name.length > 50) {
-            newErrors.name = "Name too long!";
-        }
-
-        if (!description || description.length < 10) {
-            newErrors.description = "Description must be at least 10 characters long";
-        } else if (description.length > 1500) {
-            newErrors.description = "Description too long!";
-        }
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
-
-        setErrors({});
-        createOrgMutation.mutate({ name, description });
+    const onSubmit = async (data: FormData) => {
+        createOrg.mutate(data)
     };
 
     return (
@@ -127,49 +115,21 @@ const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
                         Fill in the details below to create a new organization.
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="space-y-4">
                         <InputArbiter
                             htmlFor="name"
                             title="Organization Name"
                             inputType="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            error={errors.name}
+                            {...register("name")}
+                            error={errors.name?.message}
                             placeholder="Enter organization name"
                         />
-                        <div className="flex flex-col mt-3">
-                            <label htmlFor="description" className="text-foreground text-sm font-medium">
-                                Description
-                            </label>
-                            <textarea
-                                id="description"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Enter organization description"
-                                className="mt-1 placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-0 focus-visible:ring-primary/50 focus-visible:ring-[3px] min-h-[100px] resize-y"
-                            />
-                            {errors.description && (
-                                <p className="text-sm text-red-700 mt-1">{errors.description}</p>
-                            )}
-                        </div>
+                        <Textarea htmlFor="description" title="Description" {...register("description")} error={errors.description?.message} placeholder="Enter organization description" />
                     </div>
-                    <DialogFooter className="mt-6">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setOpen(false)}
-                            disabled={createOrgMutation.isPending}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={createOrgMutation.isPending || isUserDataLoading || !userData}
-                        >
-                            {createOrgMutation.isPending ? "Creating..." : "Create"}
-                        </Button>
-                    </DialogFooter>
+                    <Button type="submit" disabled={isSubmitting} variant={"arbiter"}>
+                        {isSubmitting ? "Creating..." : "Create"}
+                    </Button>
                 </form>
             </DialogContent>
         </Dialog>

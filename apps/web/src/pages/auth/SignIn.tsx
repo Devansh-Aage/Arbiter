@@ -1,5 +1,4 @@
 import {
-  useCurrentUser,
   useSignInWithEmail,
   useSignInWithOAuth,
   useVerifyEmailOTP,
@@ -13,8 +12,6 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
 
 interface SignInProps { }
 
@@ -28,7 +25,8 @@ const SignIn: FunctionComponent<SignInProps> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEmailLoginActive, setIsEmailLoginActive] = useState(false);
-  const { fetchToken } = useAuth();
+
+  
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
@@ -67,8 +65,6 @@ const SignIn: FunctionComponent<SignInProps> = () => {
         flowId,
         otp: otp.trim(),
       });
-      await fetchToken();
-      toast.success("Logged in Arbiter");
     } catch (error) {
       console.error("Sign in failed:", error);
       setError("Invalid OTP. Please try again.");

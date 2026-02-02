@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   useGetAccessToken,
   useIsInitialized,
@@ -13,14 +13,17 @@ import {
 } from "@coinbase/cdp-hooks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import axios from "axios";
+import type { User } from "@arbiter/db/src/types";
 
 type AuthContextType = {
   userId: string | null;
+  email: string | null;
   token: string | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
   logout?: () => Promise<void>;
-  fetchToken: () => Promise<void>;
+  setContextState: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,27 +31,43 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const { getAccessToken } = useGetAccessToken();
   const [token, setToken] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const { getAccessToken } = useGetAccessToken();
   const queryClient = useQueryClient();
   const { signOut } = useSignOut();
   const navigate = useNavigate();
   const { isInitialized } = useIsInitialized();
 
-  const fetchToken = async () => {
-    setIsAuthLoading(true);
-    const token = await getAccessToken();
-    if (token) {
-      setToken(token);
-    }
-    console.log("running");
+  const setContextState = async () => {
+    try {
+      setIsAuthLoading(true);
+      const token = await getAccessToken();
+      if (token) {
+        setToken(token);
+        const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}auth/user`, {
+          headers: {
+            "authToken": token
+          }
+        });
+        const userData = res.data;
 
-    setIsAuthLoading(false);
+        if (userData) {
+          setUserId(userData.user.id);
+          setEmail(userData.user.email);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+      toast.error("Failed to authenticate");
+    } finally {
+      setIsAuthLoading(false);
+    }
   };
 
   useEffect(() => {
     if (isInitialized) {
-      fetchToken();
+      setContextState();
     }
   }, [isInitialized]);
 
@@ -59,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(null);
       queryClient.clear();
       navigate("/auth/login");
-      toast.info("Logged out!");
+      toast.success("Logged out!");
     } catch (error) {
       console.error("Logout failed:", error);
       toast.error("Something went wrong. Try again!");
@@ -69,9 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextType = {
     userId,
     token,
+    email,
     isAuthLoading,
     logout,
-    fetchToken,
+    setContextState,
     isAuthenticated: !!userId,
   };
 

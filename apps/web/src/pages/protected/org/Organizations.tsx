@@ -8,9 +8,9 @@ import CreateOrg from "@/components/dashboard/org/CreateOrg";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2 } from "lucide-react";
 
-interface OrgDashboardProps { }
+interface OrganizationsProps { }
 
-const OrgDashboard: FunctionComponent<OrgDashboardProps> = () => {
+const Organizations: FunctionComponent<OrganizationsProps> = () => {
 
     const { token } = useAuth();
     const { data: orgs, isLoading: isOrgLoading } = useQuery({
@@ -66,4 +66,4 @@ const OrgDashboard: FunctionComponent<OrgDashboardProps> = () => {
     );
 };
 
-export default OrgDashboard;
+export default Organizations;
