@@ -19,7 +19,8 @@ model User {
   wallet   String? @unique
   username String?
   bias     String?
-  email    String
+  email    String  @unique
+  provider Provider?
 
   memberships     Membership[] //one to many
   proposaldata    ProposalData[] //one to many
@@ -30,6 +31,11 @@ model User {
 
   createdAt DateTime @default(now())
 }
+enum Provider{
+  EMAIL
+  GOOGLE
+  X
+} 
 
 model Organization {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
@@ -50,7 +56,7 @@ model Membership {
   orgId              String     @db.ObjectId
   role               MemberRole @default(MEMBER)
   voteWeight         Int        @default(1)
-  identityCommitment String     
+  identityCommitment String?     
   leafIndex          Int
 
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many

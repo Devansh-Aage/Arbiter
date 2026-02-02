@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { CdpClient } from "@coinbase/cdp-sdk";
 import { prisma } from "@arbiter/db/src/client";
 import { User } from "@arbiter/db/src/types";
+import { Provider } from "@arbiter/db/generated/prisma/enums";
 
 dotenv.config();
 
@@ -47,15 +48,19 @@ export const isLoggedIn: RequestHandler = async (req, res, next) => {
 
     if (!user) {
       let email;
+      let provider;
       for (const method of endUser.authenticationMethods) {
         if (method.type === "email") {
           email = method.email
+          provider = Provider.EMAIL
         }
         else if (method.type === "google") {
           email = method.email
+          provider = Provider.GOOGLE
         }
         else if (method.type === "x") {
           email = method.email
+          provider = Provider.X
         }
       }
       if (!email) {
@@ -66,7 +71,31 @@ export const isLoggedIn: RequestHandler = async (req, res, next) => {
         data: {
           email,
           wallet: endUser.evmSmartAccountObjects[0].address,
+          provider: provider as Provider
         },
+      });
+    }
+
+    if (!user.provider) {
+      let provider;
+      for (const method of endUser.authenticationMethods) {
+        if (method.type === "email") {
+          provider = Provider.EMAIL
+        }
+        else if (method.type === "google") {
+          provider = Provider.GOOGLE
+        }
+        else if (method.type === "x") {
+          provider = Provider.X
+        }
+      }
+      user = await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          provider: provider as Provider
+        }
       });
     }
 

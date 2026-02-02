@@ -30,5 +30,19 @@ export const createOrgClientValidation = z.object({
 });
 
 export const getOrgByIdValidation = z.object({
-  id: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid ObjectId"),
+  id: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
+});
+
+export const addMemberValidation = z.object({
+  email: z.email("Please enter a valid Email"),
+  orgId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
+});
+
+export const orgMemberValidation = z.object({
+  memberId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Member ObjectId"),
+  orgId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
+});
+
+export const OrgIdValidation = z.object({
+  orgId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
 });
