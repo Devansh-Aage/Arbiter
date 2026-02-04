@@ -16,7 +16,7 @@ datasource db {
 
 model User {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  wallet   String? @unique
+  wallet   String?
   username String?
   bias     String?
   email    String  @unique

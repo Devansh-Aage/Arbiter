@@ -15,7 +15,7 @@ export const createOrgValidation = z.object({
     .max(50, "Name too long!"),
   description: z
     .string()
-    .min(10, "The description must be at least 50 characters long")
+    .min(10, "The description must be at least 10 characters long")
     .max(1500, "Description too long!"),
 });
 export const createOrgClientValidation = z.object({
@@ -30,19 +30,29 @@ export const createOrgClientValidation = z.object({
 });
 
 export const getOrgByIdValidation = z.object({
-  id: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
+  orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
 });
 
 export const addMemberValidation = z.object({
   email: z.email("Please enter a valid Email"),
-  orgId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
+  orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
 });
 
 export const orgMemberValidation = z.object({
-  memberId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Member ObjectId"),
-  orgId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
+  membershipId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Membership ObjectId"),
+  orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
+});
+
+export const updateVoteWeightValidation = z.object({
+  membershipId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Membership ObjectId"),
+  orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
+  voteWeight: z.number().min(1, "Vote weight must be greater than 0").max(100, "Vote weight must be less than 100"),
 });
 
 export const OrgIdValidation = z.object({
-  orgId: z.custom<ObjectId>().refine((id) => id instanceof ObjectId, "Invalid Organization ObjectId"),
+  orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
+});
+
+export const emailValidation = z.object({
+  email: z.email("Please enter a valid Email"),
 });

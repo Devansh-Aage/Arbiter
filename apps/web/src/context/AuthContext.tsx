@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const token = await getAccessToken();
       if (token) {
         setToken(token);
+        console.log("token", token);
         const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}auth/user`, {
           headers: {
             "authToken": token

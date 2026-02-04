@@ -1,7 +1,7 @@
 import express from "express";
 import { rateLimit } from "express-rate-limit";
 import { isLoggedIn } from "../middleware/isLoggedIn";
-import { createOrg, getOrgById, getOrgOfUser } from "../controller/orgController";
+import { addAdminRole, addMember, createOrg, deleteOrg, getOrgById, getOrgHeaderData, getOrgMembers, getOrgOfUser, removeAdminRole, removeMember, updateVoteWeight } from "../controller/orgController";
 
 const router = express.Router();
 
@@ -20,6 +20,14 @@ const limiter = rateLimit({
 
 router.post("/create", limiter, isLoggedIn, createOrg);
 router.get("/", isLoggedIn, getOrgOfUser);
-router.get("/:id", isLoggedIn, getOrgById);
+router.get("/:orgId", isLoggedIn, getOrgById);
+router.get("/:orgId/header", isLoggedIn, getOrgHeaderData);
+router.get("/:orgId/members", isLoggedIn, getOrgMembers);
+router.post("/add-member", isLoggedIn, addMember);
+router.post("/remove-member", isLoggedIn, removeMember);
+router.post("/add-admin", isLoggedIn, addAdminRole);
+router.post("/remove-admin", isLoggedIn, removeAdminRole);
+router.post("/vote-weight", isLoggedIn, updateVoteWeight);
+router.delete("/:orgId", isLoggedIn, deleteOrg);
 
 export default router;

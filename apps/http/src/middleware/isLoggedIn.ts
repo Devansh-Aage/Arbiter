@@ -40,63 +40,53 @@ export const isLoggedIn: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    let email;
+    let provider;
+    for (const method of endUser.authenticationMethods) {
+      if (method.type === "email") {
+        email = method.email
+        provider = Provider.EMAIL
+      }
+      else if (method.type === "google") {
+        email = method.email
+        provider = Provider.GOOGLE
+      }
+      else if (method.type === "x") {
+        email = method.email
+        provider = Provider.X
+      }
+    }
+
     let user = await prisma.user.findFirst({
       where: {
-        wallet: endUser.evmSmartAccountObjects[0].address,
+        email
       }
     });
 
     if (!user) {
-      let email;
-      let provider;
-      for (const method of endUser.authenticationMethods) {
-        if (method.type === "email") {
-          email = method.email
-          provider = Provider.EMAIL
-        }
-        else if (method.type === "google") {
-          email = method.email
-          provider = Provider.GOOGLE
-        }
-        else if (method.type === "x") {
-          email = method.email
-          provider = Provider.X
-        }
-      }
-      if (!email) {
-        res.status(400).json({ error: "No Email Found" });
+      if (!email || !provider) {
+        res.status(400).json({ error: "No Email or Provider Found" });
         return;
       }
       user = await prisma.user.create({
         data: {
           email,
+          provider,
           wallet: endUser.evmSmartAccountObjects[0].address,
-          provider: provider as Provider
-        },
-      });
+        }
+      })
     }
 
-    if (!user.provider) {
-      let provider;
-      for (const method of endUser.authenticationMethods) {
-        if (method.type === "email") {
-          provider = Provider.EMAIL
-        }
-        else if (method.type === "google") {
-          provider = Provider.GOOGLE
-        }
-        else if (method.type === "x") {
-          provider = Provider.X
-        }
-      }
+    if (!user.provider || !user.wallet) {
       user = await prisma.user.update({
         where: {
-          id: user.id
+          email
         },
         data: {
-          provider: provider as Provider
+          provider,
+          wallet: endUser.evmSmartAccountObjects[0].address,
         }
-      });
+      })
     }
 
     req.user = user;

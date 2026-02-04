@@ -6,6 +6,9 @@ import { Toaster } from "./components/ui/sonner";
 import Organizations from "./pages/protected/org/Organizations";
 import OrgDashboard from "./pages/protected/org/OrgDashboard";
 import OrgLayout from "./pages/protected/org/OrgLayout";
+import Layout from "./pages/protected/Layout";
+import OrgMembers from "./pages/protected/org/OrgMembers";
+import OrgSettings from "./pages/protected/org/OrgSettings";
 
 function App() {
   return (
@@ -15,13 +18,15 @@ function App() {
         <Route path="/auth">
           <Route path="login" element={<SignIn />} />
         </Route>
-        <Route path="dashboard" element={<ProtectedRoute />}>
-          <Route path="orgs">
-            <Route index element={<Organizations />} />
-            <Route element={<OrgLayout />} >
-              <Route path=":orgId/dashboard" element={<OrgDashboard />} />
-              <Route path=":orgId/members" element={<OrgDashboard />} />
-              <Route path=":orgId/settings" element={<OrgDashboard />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="dashboard" element={<Layout />}>
+            <Route path="orgs">
+              <Route index element={<Organizations />} />
+              <Route element={<OrgLayout />} >
+                <Route path=":orgId/dashboard" element={<OrgDashboard />} />
+                <Route path=":orgId/members" element={<OrgMembers />} />
+                <Route path=":orgId/settings" element={<OrgSettings />} />
+              </Route>
             </Route>
           </Route>
         </Route>

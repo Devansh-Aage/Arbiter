@@ -5,7 +5,6 @@ import {
 } from "@coinbase/cdp-hooks";
 import { type FC } from "react";
 import { Navigate, Outlet } from "react-router";
-import Sidebar from "./dashboard/Sidebar";
 
 interface ProtectedRouteProps { }
 
@@ -18,14 +17,7 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ }) => {
     return <div>Restoring session...</div>;
   }
 
-
-
-  return isSignedIn ? (
-    <div className=' w-full h-screen font-nunito flex '>
-      <Sidebar />
-      <Outlet />
-    </div>
-  ) : <Navigate to="/auth/login" replace />;
+  return isSignedIn ? <Outlet /> : <Navigate to="/auth/login" replace />;
 };
 
 export default ProtectedRoute;

@@ -1,4 +1,4 @@
-import { addMemberValidation, createOrgValidation, OrgIdValidation, getOrgByIdValidation, orgMemberValidation } from "@arbiter/common";
+import { addMemberValidation, createOrgValidation, OrgIdValidation, getOrgByIdValidation, orgMemberValidation, updateVoteWeightValidation } from "@arbiter/common";
 import { prisma } from "@arbiter/db/src/client";
 import { Group } from "@semaphore-protocol/group";
 import { RequestHandler } from "express";
@@ -69,10 +69,6 @@ export const getOrgOfUser: RequestHandler = async (req, res) => {
         proposals: true,
       }
     });
-    if (orgs.length === 0) {
-      res.status(404).json({ message: "No organizations found for user" });
-      return;
-    }
     res.status(200).json({ orgs });
   } catch (error) {
     console.error("Error occurred getting orgs of user", error);
@@ -92,12 +88,33 @@ export const getOrgById: RequestHandler = async (req, res) => {
       });
       return;
     }
-    const { id } = validation.data;
+    const { orgId } = validation.data;
     const org = await prisma.organization.findUnique({
-      where: { id: id.toString() },
-      include: {
-        memberships: true,
-        proposals: true,
+      where: { id: orgId.toString() },
+      select: {
+        memberships: {
+          select: {
+            user: {
+              select: {
+                email: true
+              }
+            },
+            id: true,
+            role: true,
+            voteWeight: true,
+            identityCommitment: true,
+            leafIndex: true,
+            createdAt: true,
+          }
+        },
+        proposals: {
+          select: {
+            id: true,
+            title: true,
+            summary: true,
+            createdAt: true,
+          }
+        }
       }
     });
     if (!org) {
@@ -136,7 +153,6 @@ export const getOrgHeaderData: RequestHandler = async (req, res) => {
       select: {
         id: true,
         name: true,
-        description: true,
         createdAt: true,
         memberships: {
           select: { id: true }
@@ -172,7 +188,6 @@ export const getOrgHeaderData: RequestHandler = async (req, res) => {
       org: {
         id: org.id,
         name: org.name,
-        description: org.description,
         createdAt: org.createdAt,
       },
       numMemberships,
@@ -184,6 +199,52 @@ export const getOrgHeaderData: RequestHandler = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error occurred getting org header data" });
+  }
+}
+
+export const getOrgMembers: RequestHandler = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+      return;
+    }
+    const validation = OrgIdValidation.safeParse(req.params);
+    if (!validation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: validation.error,
+      });
+      return;
+    }
+    const { orgId } = validation.data;
+
+    const members = await prisma.membership.findMany({
+      where: {
+        orgId: orgId.toString(),
+      },
+      select: {
+        user: {
+          select: {
+            email: true,
+          }
+        },
+        id: true,
+        role: true,
+        voteWeight: true,
+        createdAt: true,
+      }
+    })
+    if (!members) {
+      res.status(404).json({ message: "Members not found" });
+      return;
+    }
+    res.status(200).json({ members });
+  } catch (error) {
+    console.error("Error occurred getting org members", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred getting org members" });
   }
 }
 
@@ -263,37 +324,57 @@ export const removeMember: RequestHandler = async (req, res) => {
       });
       return;
     }
-    const { memberId, orgId } = validation.data;
+    const { membershipId, orgId } = validation.data;
     const userMembership = await prisma.membership.findFirst({
       where: {
         userId: user.id,
         orgId: orgId.toString(),
       },
       select: {
-        role: true
+        role: true,
+        userId: true
       }
     })
-    const isAuthorized = userMembership?.role === "CREATOR" || userMembership?.role === "ADMIN";
-    if (!isAuthorized) {
-      res.status(403).json({ message: "You are not authorized to remove members from this organization" });
-      return;
+    const isSelfRemoval = userMembership?.userId === user.id;
+
+    if (!isSelfRemoval) {
+      const isAuthorized = userMembership?.role === "CREATOR" || userMembership?.role === "ADMIN";
+      if (!isAuthorized) {
+        res.status(403).json({ message: "You are not authorized to remove members from this organization" });
+        return;
+      }
     }
 
     const member = await prisma.membership.findFirst({
       where: {
-        userId: memberId.toString(),
-        orgId: orgId.toString(),
+        id: membershipId.toString()
       }
     })
     if (!member) {
       res.status(404).json({ message: "Member not found in this organization" });
       return;
     }
-    await prisma.membership.delete({
+
+    const isLastMember = await prisma.membership.count({
       where: {
-        id: member.id
+        orgId: orgId.toString(),
       }
     })
+    
+    if (isLastMember === 1) {
+      await prisma.organization.delete({
+        where: {
+          id: orgId.toString()
+        }
+      })
+    } else {
+      await prisma.membership.delete({
+        where: {
+          id: member.id
+        }
+      })
+    }
+
     res.status(200).json({ message: "Member removed from organization" });
   } catch (error) {
     console.error("Error occurred removing member", error);
@@ -302,6 +383,7 @@ export const removeMember: RequestHandler = async (req, res) => {
       .json({ message: "Error occurred removing member" });
   }
 }
+
 export const addAdminRole: RequestHandler = async (req, res) => {
   try {
     const user = req.user;
@@ -317,7 +399,7 @@ export const addAdminRole: RequestHandler = async (req, res) => {
       });
       return;
     }
-    const { memberId, orgId } = validation.data;
+    const { membershipId, orgId } = validation.data;
     const userMembership = await prisma.membership.findFirst({
       where: {
         userId: user.id,
@@ -335,8 +417,7 @@ export const addAdminRole: RequestHandler = async (req, res) => {
 
     const member = await prisma.membership.findFirst({
       where: {
-        userId: memberId.toString(),
-        orgId: orgId.toString(),
+        id: membershipId.toString(),
       }
     })
     if (!member) {
@@ -363,7 +444,6 @@ export const addAdminRole: RequestHandler = async (req, res) => {
   }
 }
 
-
 export const removeAdminRole: RequestHandler = async (req, res) => {
   try {
     const user = req.user;
@@ -379,7 +459,7 @@ export const removeAdminRole: RequestHandler = async (req, res) => {
       });
       return;
     }
-    const { memberId, orgId } = validation.data;
+    const { membershipId, orgId } = validation.data;
     const userMembership = await prisma.membership.findFirst({
       where: {
         userId: user.id,
@@ -397,8 +477,7 @@ export const removeAdminRole: RequestHandler = async (req, res) => {
 
     const member = await prisma.membership.findFirst({
       where: {
-        userId: memberId.toString(),
-        orgId: orgId.toString(),
+        id: membershipId.toString()
       }
     })
     if (!member) {
@@ -428,6 +507,53 @@ export const removeAdminRole: RequestHandler = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error occurred removing admin role" });
+  }
+}
+
+export const updateVoteWeight: RequestHandler = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+      return;
+    }
+    const validation = updateVoteWeightValidation.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: validation.error,
+      });
+      return;
+    }
+    const { membershipId, orgId, voteWeight } = validation.data;
+    const userMembership = await prisma.membership.findFirst({
+      where: {
+        userId: user.id,
+        orgId: orgId.toString(),
+      },
+      select: {
+        role: true
+      }
+    })
+    const isAuthorized = userMembership?.role === "CREATOR" || userMembership?.role === "ADMIN";
+    if (!isAuthorized) {
+      res.status(403).json({ message: "You are not authorized to update vote weight of members for this organization" });
+      return;
+    }
+    await prisma.membership.update({
+      where: {
+        id: membershipId.toString()
+      },
+      data: {
+        voteWeight
+      }
+    })
+    res.status(200).json({ message: "Vote weight updated for member" });
+  } catch (error) {
+    console.error("Error occurred updating vote weight", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred updating vote weight" });
   }
 }
 

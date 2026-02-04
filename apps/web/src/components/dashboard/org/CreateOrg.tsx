@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type { FunctionComponent } from "react";
 import { useState } from "react";
 import {
@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createOrgClientValidation } from "@arbiter/common";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
+import IconBtn from "@/components/ui/IconButton";
 
 interface CreateOrgProps { }
 type FormData = z.infer<typeof createOrgClientValidation>;
@@ -44,7 +45,7 @@ const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
     } = useForm<FormData>({
         resolver: zodResolver(createOrgClientValidation),
     });
-
+    console.log("isSubmitting", isSubmitting);
 
 
     const createOrg = useMutation({
@@ -82,8 +83,12 @@ const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
                 setError("description", { message: err.message });
                 return;
             }
+            if (err instanceof AxiosError) {
+                toast.error(err.response?.data.message)
+                return;
+            }
             else {
-                console.error("Failed to create milestone: ", err)
+                console.error("Failed to create organization: ", err)
                 toast.error("An unexpected error occurred!")
             }
         },
@@ -103,10 +108,7 @@ const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Organization
-                </Button>
+                <IconBtn icon={<Plus className="size-5" />} title="Create Organization" />
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
