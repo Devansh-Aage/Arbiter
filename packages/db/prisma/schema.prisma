@@ -147,7 +147,7 @@ model Vote {
 
   signature String
   hash      String?
-  msgHash   String // this msg was signed by pvt key so we can verify the sign 
+  // msgHash   String // this msg was signed by pvt key so we can verify the sign 
 
   votedAt DateTime @default(now())
 

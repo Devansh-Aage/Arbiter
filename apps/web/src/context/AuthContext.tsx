@@ -5,16 +5,16 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetAccessToken,
   useIsInitialized,
   useSignOut,
+  useIsSignedIn,
 } from "@coinbase/cdp-hooks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import type { User } from "@arbiter/db/src/types";
 
 type AuthContextType = {
   userId: string | null;
@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { signOut } = useSignOut();
   const navigate = useNavigate();
   const { isInitialized } = useIsInitialized();
+  const { isSignedIn } = useIsSignedIn();
 
   const setContextState = async () => {
     try {
@@ -46,11 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (token) {
         setToken(token);
         console.log("token", token);
-        const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}auth/user`, {
-          headers: {
-            "authToken": token
-          }
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_HTTP_URL}auth/user`,
+          {
+            headers: {
+              authToken: token,
+            },
+          },
+        );
         const userData = res.data;
 
         if (userData) {
@@ -67,10 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && isSignedIn) {
       setContextState();
     }
-  }, [isInitialized]);
+  }, [isInitialized, isSignedIn]);
 
   const logout = async () => {
     try {

@@ -41,11 +41,10 @@ const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
         handleSubmit,
         reset,
         setError,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm<FormData>({
         resolver: zodResolver(createOrgClientValidation),
     });
-    console.log("isSubmitting", isSubmitting);
 
 
     const createOrg = useMutation({
@@ -129,8 +128,8 @@ const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
                         />
                         <Textarea htmlFor="description" title="Description" {...register("description")} error={errors.description?.message} placeholder="Enter organization description" />
                     </div>
-                    <Button type="submit" disabled={isSubmitting} variant={"arbiter"}>
-                        {isSubmitting ? "Creating..." : "Create"}
+                    <Button type="submit" disabled={createOrg.isPending} variant={"arbiter"}>
+                        {(createOrg.isPending) ? "Creating..." : "Create"}
                     </Button>
                 </form>
             </DialogContent>
