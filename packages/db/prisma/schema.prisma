@@ -147,6 +147,7 @@ model Vote {
 
   signature String
   hash      String?
+  voteValue Int // value= 1*voteWeight
   // msgHash   String // this msg was signed by pvt key so we can verify the sign 
 
   votedAt DateTime @default(now())

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { isAuth } from "./middleware/isAuth";
 import { User } from "@arbiter/db/src/types";
 import { getActiveProposals } from "./middleware/getActiveProposals";
+import { voteRoutes } from "./routes/voteRoutes";
 
 dotenv.config();
 
@@ -32,9 +33,11 @@ export function getSocketsForUser(userId: string): Set<CustomSocket> {
 
 io.on("connection", async (socket: CustomSocket) => {
     const user = socket.data.user;
+    console.log("user", user);
+
     const userId = user.id;
 
-    socket.join(`user:${userId}`);
+    // socket.join(`user:${userId}`); not needed as no user specific events are being emitted
 
     const proposalIds = await getActiveProposals(socket);
     if (proposalIds?.length > 0) {
@@ -50,6 +53,8 @@ io.on("connection", async (socket: CustomSocket) => {
 
     activeSockets += 1;
     console.log(`User ${userId} connected with socket ${socket.id}`);
+
+    voteRoutes(socket);
 
     socket.on("error", (err) => {
         console.log(err);

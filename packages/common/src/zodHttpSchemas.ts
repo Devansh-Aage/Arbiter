@@ -56,3 +56,20 @@ export const OrgIdValidation = z.object({
 export const emailValidation = z.object({
   email: z.email("Please enter a valid Email"),
 });
+
+export const createDiscussionValidation = z.object({
+  text: z.string().min(1, "Text must be at least 1 character").max(5000, "Text must be less than 5000 characters"),
+  proposalId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Proposal ObjectId"),
+  userId: z.string().refine((id) => ObjectId.isValid(id), "Invalid User ObjectId"),
+  parentId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Discussion ObjectId").optional(),
+})
+
+export const discussionVoteValidation=z.object({
+  discussionId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Discussion ObjectId"),
+  userId: z.string().refine((id) => ObjectId.isValid(id), "Invalid User ObjectId"),
+  type: z.enum(["UP", "DOWN"]),
+})
+
+export const getDiscussionsValidation=z.object({
+  proposalId:z.string().refine((id)=>ObjectId.isValid(id),"Invlaid Proposal Object ID!")
+})
