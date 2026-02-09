@@ -77,16 +77,29 @@ export const isLoggedIn: RequestHandler = async (req, res, next) => {
       })
     }
 
-    if (!user.provider || !user.wallet) {
+    if (!user.provider) {
       user = await prisma.user.update({
         where: {
           email
         },
         data: {
-          provider,
+          provider
+        }
+      })
+    }
+    if (!user.wallet) {
+      user = await prisma.user.update({
+        where: {
+          email
+        },
+        data: {
           wallet: endUser.evmSmartAccountObjects[0].address,
         }
       })
+    }
+    if (user.provider !== provider) {
+      res.status(409).json({ error: `Please Login using ${user.provider}` });
+      return;
     }
 
     req.user = user;

@@ -288,6 +288,16 @@ export const addMember: RequestHandler = async (req, res) => {
         },
       });
     }
+    const alreadyMember = await prisma.membership.findFirst({
+      where: {
+        orgId,
+        userId: member.id
+      }
+    })
+    if (alreadyMember) {
+      res.status(400).json({ message: "Already a member of the Org" });
+      return;
+    }
     const orgMemberLength = await prisma.membership.count({
       where: {
         orgId: orgId.toString(),
@@ -360,7 +370,7 @@ export const removeMember: RequestHandler = async (req, res) => {
         orgId: orgId.toString(),
       }
     })
-    
+
     if (isLastMember === 1) {
       await prisma.organization.delete({
         where: {

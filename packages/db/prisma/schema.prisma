@@ -15,11 +15,10 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
   wallet   String?
   username String?
-  bias     String?
-  email    String  @unique
+  email    String    @unique
   provider Provider?
 
   memberships     Membership[] //one to many
@@ -31,11 +30,12 @@ model User {
 
   createdAt DateTime @default(now())
 }
-enum Provider{
+
+enum Provider {
   EMAIL
   GOOGLE
   X
-} 
+}
 
 model Organization {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
@@ -52,12 +52,14 @@ model Organization {
 
 model Membership {
   id                 String     @id @default(auto()) @map("_id") @db.ObjectId
-  userId             String     @db.ObjectId
-  orgId              String     @db.ObjectId
   role               MemberRole @default(MEMBER)
   voteWeight         Int        @default(1)
-  identityCommitment String?     
+  identityCommitment String?
+  bias               String?
   leafIndex          Int
+
+  orgId  String @db.ObjectId
+  userId String @db.ObjectId
 
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade) //one to many
   org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade) //one to many

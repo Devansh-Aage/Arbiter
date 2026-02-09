@@ -14,7 +14,7 @@ import {
 } from "@coinbase/cdp-hooks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 type AuthContextType = {
   userId: string | null;
@@ -65,6 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to fetch user data:", error);
       toast.error("Failed to authenticate");
+      if (error instanceof AxiosError) {
+        if (error.status === 409) {
+          toast.error(error.response?.data.error);
+        }
+      }
     } finally {
       setIsAuthLoading(false);
     }
