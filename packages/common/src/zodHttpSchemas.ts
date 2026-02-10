@@ -64,12 +64,21 @@ export const createDiscussionValidation = z.object({
   parentId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Discussion ObjectId").optional(),
 })
 
-export const discussionVoteValidation=z.object({
+export const discussionVoteValidation = z.object({
   discussionId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Discussion ObjectId"),
   userId: z.string().refine((id) => ObjectId.isValid(id), "Invalid User ObjectId"),
   type: z.enum(["UP", "DOWN"]),
 })
 
-export const getDiscussionsValidation=z.object({
-  proposalId:z.string().refine((id)=>ObjectId.isValid(id),"Invlaid Proposal Object ID!")
+export const getDiscussionsValidation = z.object({
+  proposalId: z.string().refine((id) => ObjectId.isValid(id), "Invlaid Proposal Object ID!")
+})
+
+export const setBiasValidation = z.object({
+  orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
+  bias: z.string().min(1, "Bias must be at least 1 character").max(2000, "Bias must be less than 2000 characters"),
+})
+
+export const setBiasClientValidation = z.object({
+  bias: z.string().min(1, "Interests must be at least 1 character").max(2000, "Interests must be less than 2000 characters"),
 })

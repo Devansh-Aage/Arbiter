@@ -1,7 +1,7 @@
 import express from "express";
 import { rateLimit } from "express-rate-limit";
 import { isLoggedIn } from "../middleware/isLoggedIn";
-import { addAdminRole, addMember, createOrg, deleteOrg, getOrgById, getOrgHeaderData, getOrgMembers, getOrgOfUser, removeAdminRole, removeMember, updateVoteWeight } from "../controller/orgController";
+import { addAdminRole, addMember, createOrg, deleteOrg, getBias, getOrgById, getOrgHeaderData, getOrgMembers, getOrgOfUser, removeAdminRole, removeMember, setBias, updateVoteWeight } from "../controller/orgController";
 
 const router = express.Router();
 
@@ -29,5 +29,7 @@ router.post("/add-admin", isLoggedIn, addAdminRole);
 router.post("/remove-admin", isLoggedIn, removeAdminRole);
 router.post("/vote-weight", isLoggedIn, updateVoteWeight);
 router.delete("/:orgId", isLoggedIn, deleteOrg);
+router.post("/bias", isLoggedIn, setBias);
+router.get("/:orgId/bias", isLoggedIn, getBias);
 
 export default router;

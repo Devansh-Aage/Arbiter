@@ -1,4 +1,4 @@
-import { addMemberValidation, createOrgValidation, OrgIdValidation, getOrgByIdValidation, orgMemberValidation, updateVoteWeightValidation } from "@arbiter/common";
+import { addMemberValidation, createOrgValidation, OrgIdValidation, getOrgByIdValidation, orgMemberValidation, updateVoteWeightValidation, setBiasValidation } from "@arbiter/common";
 import { prisma } from "@arbiter/db/src/client";
 import { Group } from "@semaphore-protocol/group";
 import { RequestHandler } from "express";
@@ -606,5 +606,86 @@ export const deleteOrg: RequestHandler = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error occurred deleting organization" });
+  }
+}
+
+export const getBias: RequestHandler = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+      return;
+    }
+    const validation = OrgIdValidation.safeParse(req.params);
+    if (!validation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: validation.error,
+      });
+      return;
+    }
+    const { orgId } = validation.data;
+
+    const member = await prisma.membership.findFirst({
+      where: {
+        userId: user.id,
+        orgId: orgId,
+      }
+    })
+    if (!member) {
+      res.status(404).json({ message: "You are not a member of this organization" });
+      return;
+    }
+
+    res.status(200).json({ bias: member.bias });
+  } catch (error) {
+    console.error("Error occurred getting bias", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred getting bias" });
+  }
+}
+
+export const setBias: RequestHandler = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+      return;
+    }
+    const validation = setBiasValidation.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: validation.error,
+      });
+      return;
+    }
+    const { orgId, bias } = validation.data;
+    const member = await prisma.membership.findFirst({
+      where: {
+        userId: user.id,
+        orgId: orgId,
+      }
+    })
+    if (!member) {
+      res.status(404).json({ message: "You are not a member of this organization" });
+      return;
+    }
+
+    await prisma.membership.update({
+      where: {
+        id: member.id,
+      },
+      data: {
+        bias
+      }
+    })
+    res.status(200).json({ message: "Bias set for member" });
+  } catch (error) {
+    console.error("Error occurred setting bias", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred setting bias" });
   }
 }
