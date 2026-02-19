@@ -1,4 +1,4 @@
-import { type FC } from 'react'
+import { useState, useEffect, type FC } from 'react'
 import SideLink from './SideLink'
 import { Building, LogOut, Moon, Settings, Sun, User } from "lucide-react"
 import { useQuery } from '@tanstack/react-query'
@@ -11,6 +11,7 @@ import { useTheme } from '../theme-provider'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Separator } from '../ui/separator'
 import Avatar from '../avatar'
+import { useGetAccessToken } from '@coinbase/cdp-hooks'
 
 
 interface SidebarProps {
@@ -20,7 +21,15 @@ interface SidebarProps {
 const Sidebar: FC<SidebarProps> = ({ }) => {
     const { logout } = useAuth()
     const { theme, setTheme } = useTheme();
-    const { token } = useAuth();
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
     const { data: userData, isLoading: isUserDataLoading } = useQuery({
         queryKey: ["userData"],
         queryFn: async (): Promise<{ user: UserType }> => {

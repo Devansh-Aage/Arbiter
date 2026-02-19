@@ -1,4 +1,4 @@
-import { useState, type FC } from "react"
+import { useState, useEffect, type FC } from "react"
 import {
     Dialog,
     DialogContent,
@@ -16,10 +16,10 @@ import { setBiasClientValidation } from "@arbiter/common";
 import z from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { useAuth } from "@/context/AuthContext";
 import { useParams } from "react-router";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
 interface AddBiasProps {
 }
@@ -27,7 +27,15 @@ interface AddBiasProps {
 type FormData = z.infer<typeof setBiasClientValidation>;
 
 const AddBias: FC<AddBiasProps> = ({ }) => {
-    const { token } = useAuth();
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
     const params = useParams();
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();

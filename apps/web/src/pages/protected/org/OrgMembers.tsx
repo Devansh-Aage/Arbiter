@@ -7,15 +7,26 @@ import { useAuth } from "@/context/AuthContext";
 import type { MemberTableData } from "@arbiter/db/src/types";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import type { FC } from "react"
+import { useState, useEffect, type FC } from "react"
 import { useParams } from "react-router";
+import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
 interface OrgMembersProps {
 }
 
 const OrgMembers: FC<OrgMembersProps> = ({ }) => {
     let params = useParams();
-    const { token, email: userEmail } = useAuth();
+    const { email: userEmail } = useAuth();
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
+
     const { data, isSuccess } = useQuery({
         queryKey: ["org", params.orgId, "members"],
         queryFn: async (): Promise<{ members: MemberTableData[] }> => {
@@ -25,7 +36,8 @@ const OrgMembers: FC<OrgMembersProps> = ({ }) => {
                 }
             })
             return res.data;
-        }
+        },
+        enabled: !!token
     })
 
     const user = data?.members.find((member) => member.user.email === userEmail);

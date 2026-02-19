@@ -19,7 +19,6 @@ model User {
   wallet   String?
   username String?
   email    String    @unique
-  provider Provider?
 
   memberships     Membership[] //one to many
   proposaldata    ProposalData[] //one to many
@@ -29,12 +28,6 @@ model User {
   messages        Message[]
 
   createdAt DateTime @default(now())
-}
-
-enum Provider {
-  EMAIL
-  GOOGLE
-  X
 }
 
 model Organization {

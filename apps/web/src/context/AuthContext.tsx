@@ -19,7 +19,6 @@ import axios, { AxiosError } from "axios";
 type AuthContextType = {
   userId: string | null;
   email: string | null;
-  token: string | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
   logout?: () => Promise<void>;
@@ -31,7 +30,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const { getAccessToken } = useGetAccessToken();
   const queryClient = useQueryClient();
@@ -45,8 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthLoading(true);
       const token = await getAccessToken();
       if (token) {
-        setToken(token);
-        console.log("token", token);
         const res = await axios.get(
           `${import.meta.env.VITE_HTTP_URL}auth/user`,
           {
@@ -85,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut();
       setUserId(null);
-      setToken(null);
       queryClient.clear();
       navigate("/auth/login");
       toast.success("Logged out!");
@@ -97,7 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextType = {
     userId,
-    token,
     email,
     isAuthLoading,
     logout,

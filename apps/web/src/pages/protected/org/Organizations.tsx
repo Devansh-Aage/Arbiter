@@ -1,18 +1,26 @@
-import { useAuth } from "@/context/AuthContext";
 import type { Organization } from "@arbiter/db/src/types";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import type { FunctionComponent } from "react";
+import { useState, type FunctionComponent, useEffect } from "react";
 import OrgCard from "@/components/dashboard/org/OrgCard";
 import CreateOrg from "@/components/dashboard/org/CreateOrg";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2 } from "lucide-react";
+import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
 interface OrganizationsProps { }
 
 const Organizations: FunctionComponent<OrganizationsProps> = () => {
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
 
-    const { token } = useAuth();
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })()
+    }, [])
+    
     const { data: orgs, isLoading: isOrgLoading } = useQuery({
         queryKey: ["orgs"],
         queryFn: async (): Promise<{ orgs: Organization[] }> => {

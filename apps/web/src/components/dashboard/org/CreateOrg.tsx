@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import type { FunctionComponent } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { sha256 } from 'hash-wasm';
 import { Identity } from "@semaphore-protocol/identity"
-import { useCurrentUser } from "@coinbase/cdp-hooks";
+import { useCurrentUser, useGetAccessToken } from "@coinbase/cdp-hooks";
 import { toViemAccount } from "@coinbase/cdp-core";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +30,15 @@ interface CreateOrgProps { }
 type FormData = z.infer<typeof createOrgClientValidation>;
 
 const CreateOrg: FunctionComponent<CreateOrgProps> = () => {
-    const { token } = useAuth();
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
     const { currentUser } = useCurrentUser()

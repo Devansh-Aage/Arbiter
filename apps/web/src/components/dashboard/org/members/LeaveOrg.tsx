@@ -1,7 +1,6 @@
-import { useAuth } from "@/context/AuthContext"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
-import { useState, type FC } from "react"
+import { useState, useEffect, type FC } from "react"
 import { useNavigate } from "react-router"
 import { toast } from "sonner"
 import {
@@ -16,6 +15,7 @@ import {
 import IconBtn from "@/components/ui/IconButton"
 import { DoorOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useGetAccessToken } from "@coinbase/cdp-hooks"
 
 interface LeaveOrgProps {
     orgId: string;
@@ -23,7 +23,15 @@ interface LeaveOrgProps {
 }
 
 const LeaveOrg: FC<LeaveOrgProps> = ({ orgId, membershipId }) => {
-    const { token } = useAuth()
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
     const [isOpen, setIsOpen] = useState(false)
     const queryClient = useQueryClient()
     const navigate = useNavigate()

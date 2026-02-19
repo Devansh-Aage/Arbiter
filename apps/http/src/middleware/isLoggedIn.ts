@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import { CdpClient } from "@coinbase/cdp-sdk";
 import { prisma } from "@arbiter/db/src/client";
 import { User } from "@arbiter/db/src/types";
-import { Provider } from "@arbiter/db/generated/prisma/enums";
 
 dotenv.config();
 
@@ -40,21 +39,11 @@ export const isLoggedIn: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    let email;
-    let provider;
-    for (const method of endUser.authenticationMethods) {
-      if (method.type === "email") {
-        email = method.email
-        provider = Provider.EMAIL
-      }
-      else if (method.type === "google") {
-        email = method.email
-        provider = Provider.GOOGLE
-      }
-      else if (method.type === "x") {
-        email = method.email
-        provider = Provider.X
-      }
+    const email = endUser.authenticationMethods[0].type === "google" ? endUser.authenticationMethods[0].email : null;
+
+    if (!email) {
+      res.status(400).json({ error: "No Email Found" });
+      return;
     }
 
     let user = await prisma.user.findFirst({
@@ -64,29 +53,14 @@ export const isLoggedIn: RequestHandler = async (req, res, next) => {
     });
 
     if (!user) {
-      if (!email || !provider) {
-        res.status(400).json({ error: "No Email or Provider Found" });
-        return;
-      }
       user = await prisma.user.create({
         data: {
           email,
-          provider,
           wallet: endUser.evmSmartAccountObjects[0].address,
         }
       })
     }
 
-    if (!user.provider) {
-      user = await prisma.user.update({
-        where: {
-          email
-        },
-        data: {
-          provider
-        }
-      })
-    }
     if (!user.wallet) {
       user = await prisma.user.update({
         where: {
@@ -96,10 +70,6 @@ export const isLoggedIn: RequestHandler = async (req, res, next) => {
           wallet: endUser.evmSmartAccountObjects[0].address,
         }
       })
-    }
-    if (user.provider !== provider) {
-      res.status(409).json({ error: `Please Login using ${user.provider}` });
-      return;
     }
 
     req.user = user;

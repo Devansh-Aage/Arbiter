@@ -82,3 +82,7 @@ export const setBiasValidation = z.object({
 export const setBiasClientValidation = z.object({
   bias: z.string().min(1, "Interests must be at least 1 character").max(2000, "Interests must be less than 2000 characters"),
 })
+
+export const createProposalValidation = z.object({
+  title: z.string().min(1, "Title must be at least 1 character").max(200, "Title must be less than 200 characters")
+})

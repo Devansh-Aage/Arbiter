@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import type { FC } from "react"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -21,6 +21,7 @@ import { useParams } from "react-router";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import IconBtn from "@/components/ui/IconButton";
+import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
 interface AddMemberProps {
 }
@@ -30,10 +31,18 @@ type FormData = z.infer<typeof emailValidation>;
 const AddMember: FC<AddMemberProps> = ({ }) => {
     const params = useParams();
     const { orgId } = params;
-    const { token } = useAuth();
+    const { userId } = useAuth();
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
-    const { userId } = useAuth()
 
     const {
         register,

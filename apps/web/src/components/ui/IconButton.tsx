@@ -11,7 +11,7 @@ interface IconBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const IconBtn: FC<IconBtnProps> = ({ icon, title, className, onClick, disabled, ...props }) => {
     return (
-        <button onClick={onClick} {...props} className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-foreground
+        <button onClick={onClick} {...props} className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-white
         border-2 border-transparent focus:border-slate-500 active:border-slate-600  ${disabled ? 'opcaity-60' : 'bg-primary hover:opacity-85'} ${className}`}>
             {disabled ? <Loader className='animate-spin' /> : icon}
             <div className='h-6 w-px bg-foreground opacity-40 border-0' />

@@ -1,13 +1,13 @@
-import { type FC, useState } from "react"
+import { type FC, useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import InputArbiter from "@/components/ui/InputArbiter"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
-import { useAuth } from "@/context/AuthContext"
 import { toast } from "sonner"
 import { useNavigate } from "react-router"
+import { useGetAccessToken } from "@coinbase/cdp-hooks"
 
 interface DeleteOrgProps {
     orgName: string;
@@ -15,7 +15,15 @@ interface DeleteOrgProps {
 }
 
 const DeleteOrg: FC<DeleteOrgProps> = ({ orgName, orgId }) => {
-    const { token } = useAuth()
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
     const [isOpen, setIsOpen] = useState(false)
     const [confirmText, setConfirmText] = useState("")
     const queryClient = useQueryClient()

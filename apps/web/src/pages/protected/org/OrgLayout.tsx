@@ -1,17 +1,25 @@
 import OrgHeader from "@/components/dashboard/org/OrgHeader";
 import OrgSidebar from "@/components/dashboard/org/OrgSidebar"
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import type { FC } from "react"
+import { useState, useEffect, type FC } from "react"
 import { Outlet, useParams } from "react-router"
 import { type OrgHeaderData } from "@arbiter/db/src/types";
+import { useGetAccessToken } from "@coinbase/cdp-hooks";
 interface OrgLayoutProps {
 }
 const OrgLayout: FC<OrgLayoutProps> = ({ }) => {
     let params = useParams();
-    const { token } = useAuth();
+    const { getAccessToken } = useGetAccessToken();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const token = await getAccessToken();
+            setToken(token);
+        })();
+    }, []);
 
     const { data: orgHeaderData, isSuccess: isOrgHeaderDataSuccess } = useQuery({
         queryKey: ["org", params.orgId, "header"],
@@ -22,7 +30,8 @@ const OrgLayout: FC<OrgLayoutProps> = ({ }) => {
                 }
             });
             return res.data;
-        }
+        },
+        enabled: !!token
     })
 
     return (
