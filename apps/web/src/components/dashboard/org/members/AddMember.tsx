@@ -21,26 +21,17 @@ import { useParams } from "react-router";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import IconBtn from "@/components/ui/IconButton";
-import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
 interface AddMemberProps {
+    token: string
 }
 
 type FormData = z.infer<typeof emailValidation>;
 
-const AddMember: FC<AddMemberProps> = ({ }) => {
+const AddMember: FC<AddMemberProps> = ({ token }) => {
     const params = useParams();
     const { orgId } = params;
     const { userId } = useAuth();
-    const { getAccessToken } = useGetAccessToken();
-    const [token, setToken] = useState<string | null>(null);
-
-    useEffect(() => {
-        (async () => {
-            const token = await getAccessToken();
-            setToken(token);
-        })();
-    }, []);
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
 

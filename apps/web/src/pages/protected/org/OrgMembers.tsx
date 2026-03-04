@@ -47,13 +47,13 @@ const OrgMembers: FC<OrgMembersProps> = ({ }) => {
             <div className="flex items-center justify-between">
                 <p>Members</p>
                 <div className="flex items-center gap-2">
-                    {isSuccess ?
-                        <LeaveOrg orgId={params.orgId as string} membershipId={user?.id ?? ""} />
+                    {token && isSuccess ?
+                        <LeaveOrg token={token} orgId={params.orgId as string} membershipId={user?.id ?? ""} />
                         :
                         <Skeleton className="h-20 w-full" />
                     }
 
-                    {isAuthorized && <AddMember />}
+                    {token && isAuthorized && <AddMember token={token} />}
                 </div>
             </div>
             <div className="mt-4">
@@ -79,8 +79,8 @@ const OrgMembers: FC<OrgMembersProps> = ({ }) => {
                                 }
                             </TableBody>
                         </Table>
-                        :
-                        <MemberTable members={data.members} />
+                        : token &&
+                        <MemberTable token={token} members={data.members} />
                 }
             </div>
         </div>

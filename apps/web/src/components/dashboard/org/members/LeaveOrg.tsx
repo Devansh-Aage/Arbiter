@@ -15,23 +15,14 @@ import {
 import IconBtn from "@/components/ui/IconButton"
 import { DoorOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useGetAccessToken } from "@coinbase/cdp-hooks"
 
 interface LeaveOrgProps {
     orgId: string;
     membershipId: string;
+    token: string
 }
 
-const LeaveOrg: FC<LeaveOrgProps> = ({ orgId, membershipId }) => {
-    const { getAccessToken } = useGetAccessToken();
-    const [token, setToken] = useState<string | null>(null);
-
-    useEffect(() => {
-        (async () => {
-            const token = await getAccessToken();
-            setToken(token);
-        })();
-    }, []);
+const LeaveOrg: FC<LeaveOrgProps> = ({ orgId, membershipId, token }) => {
     const [isOpen, setIsOpen] = useState(false)
     const queryClient = useQueryClient()
     const navigate = useNavigate()

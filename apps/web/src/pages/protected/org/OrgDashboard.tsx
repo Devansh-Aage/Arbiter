@@ -38,16 +38,31 @@ const OrgDashboard: FC<OrgDashboardProps> = ({ }) => {
         enabled: !!token
     })
 
+    const { data: isAuthorizedData } = useQuery({
+        queryKey: ["org", params.orgId, "role"],
+        queryFn: async (): Promise<{ isAuthorized: boolean }> => {
+            const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}org/${params.orgId}/role`, {
+                headers: {
+                    "authToken": token
+                }
+            })
+            return res.data;
+        },
+        enabled: !!token
+    })
+
+    const isAuthorized = isAuthorizedData?.isAuthorized;
+
     return (
         <div className="p-4 w-full flex flex-col gap-4">
             {
-                isSuccess && data?.bias === null ? <AddBias /> : null
+                token && isSuccess && data?.bias === null ? <AddBias token={token} /> : null
             }
             <div className="w-full ">
                 <div className="flex items-center justify-between">
                     <p>Proposals</p>
                     <div className="flex items-center gap-2">
-                        <AddProposal />
+                        {token && isAuthorized && <AddProposal token={token} />}
                     </div>
                 </div>
                 <div className="mt-4">

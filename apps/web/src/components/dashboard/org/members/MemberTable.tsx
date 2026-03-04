@@ -21,13 +21,13 @@ import axios, { AxiosError } from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useParams } from "react-router";
 import { toast } from "sonner";
-import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
 interface MemberTableProps {
     members: MemberTableData[];
+    token: string
 }
 
-const MemberTable: FC<MemberTableProps> = ({ members }) => {
+const MemberTable: FC<MemberTableProps> = ({ members, token }) => {
     const [editingVoteWeight, setEditingVoteWeight] = useState<string | null>(null)
     const [voteWeightValues, setVoteWeightValues] = useState<Record<string, number>>({})
     const [changedValues, setChangedValues] = useState<Set<string>>(new Set())
@@ -35,15 +35,6 @@ const MemberTable: FC<MemberTableProps> = ({ members }) => {
     const params = useParams();
     const { orgId } = params;
     const { email: userEmail } = useAuth();
-    const { getAccessToken } = useGetAccessToken();
-    const [token, setToken] = useState<string | null>(null);
-
-    useEffect(() => {
-        (async () => {
-            const token = await getAccessToken();
-            setToken(token);
-        })();
-    }, []);
 
     const user = members.find((member) => member.user.email === userEmail);
     const isAuthorized = user?.role === "CREATOR" || user?.role === "ADMIN";

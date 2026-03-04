@@ -86,3 +86,10 @@ export const setBiasClientValidation = z.object({
 export const createProposalValidation = z.object({
   title: z.string().min(1, "Title must be at least 1 character").max(200, "Title must be less than 200 characters")
 })
+
+export const updateDescriptionValidation = z.object({
+  description: z
+    .string()
+    .min(10, "The description must be at least 50 characters long")
+    .max(1500, "Description too long!"),
+})

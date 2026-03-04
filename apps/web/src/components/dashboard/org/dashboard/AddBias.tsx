@@ -19,28 +19,19 @@ import axios, { AxiosError } from "axios";
 import { useParams } from "react-router";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
-import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
 interface AddBiasProps {
+    token: string
 }
 
 type FormData = z.infer<typeof setBiasClientValidation>;
 
-const AddBias: FC<AddBiasProps> = ({ }) => {
-    const { getAccessToken } = useGetAccessToken();
-    const [token, setToken] = useState<string | null>(null);
-
-    useEffect(() => {
-        (async () => {
-            const token = await getAccessToken();
-            setToken(token);
-        })();
-    }, []);
+const AddBias: FC<AddBiasProps> = ({ token }) => {
     const params = useParams();
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
     const orgId = params.orgId as string;
-    
+
     const {
         register,
         handleSubmit,

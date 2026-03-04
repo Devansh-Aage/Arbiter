@@ -7,6 +7,7 @@ import DeleteOrg from "@/components/dashboard/org/settings/DeleteOrg";
 import { Skeleton } from "@/components/ui/skeleton";
 import EditBias from "@/components/dashboard/org/settings/EditBias";
 import { useGetAccessToken } from "@coinbase/cdp-hooks";
+import EditDescription from "@/components/dashboard/org/settings/EditDescription";
 
 interface OrgSettingsProps {
 }
@@ -37,9 +38,25 @@ const OrgSettings: FC<OrgSettingsProps> = ({ }) => {
         enabled: !!token
     })
 
+    const { data } = useQuery({
+        queryKey: ["org", params.orgId, "role"],
+        queryFn: async (): Promise<{ isAuthorized: boolean }> => {
+            const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}org/${params.orgId}/role`, {
+                headers: {
+                    "authToken": token
+                }
+            })
+            return res.data;
+        },
+        enabled: !!token
+    })
+
+    const isAuthorized = data?.isAuthorized;
+
     return (
         <div className="py-4 px-8 w-full flex flex-col gap-5">
-            <EditBias />
+            {token && isAuthorized && <EditDescription token={token} />}
+            {token && <EditBias token={token} />}
             {
                 isOrgHeaderDataSuccess ?
                     <DeleteOrg orgId={orgHeaderData.org.id} orgName={orgHeaderData?.org.name} />

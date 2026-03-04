@@ -20,22 +20,14 @@ import { useParams } from "react-router";
 import { toast } from "sonner";
 import { Pen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetAccessToken } from "@coinbase/cdp-hooks";
 
-interface EditBiasProps {}
+interface EditBiasProps {
+  token: string;
+}
 
 type FormData = z.infer<typeof setBiasClientValidation>;
 
-const EditBias: FC<EditBiasProps> = ({}) => {
-  const { getAccessToken } = useGetAccessToken();
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const token = await getAccessToken();
-      setToken(token);
-    })();
-  }, []);
+const EditBias: FC<EditBiasProps> = ({ token }) => {
   const params = useParams();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -67,6 +59,12 @@ const EditBias: FC<EditBiasProps> = ({}) => {
     resolver: zodResolver(setBiasClientValidation),
     defaultValues: { bias: biasData?.bias },
   });
+
+  useEffect(() => {
+    if (biasData?.bias) {
+      reset({ bias: biasData.bias });
+    }
+  }, [biasData]);
 
   const editBias = useMutation({
     mutationFn: async (data: { bias: string }) => {

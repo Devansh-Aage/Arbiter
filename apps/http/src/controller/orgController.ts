@@ -1,4 +1,4 @@
-import { addMemberValidation, createOrgValidation, OrgIdValidation, getOrgByIdValidation, orgMemberValidation, updateVoteWeightValidation, setBiasValidation } from "@arbiter/common";
+import { addMemberValidation, createOrgValidation, OrgIdValidation, getOrgByIdValidation, orgMemberValidation, updateVoteWeightValidation, setBiasValidation, updateDescriptionValidation } from "@arbiter/common";
 import { prisma } from "@arbiter/db/src/client";
 import { Group } from "@semaphore-protocol/group";
 import { RequestHandler } from "express";
@@ -687,5 +687,151 @@ export const setBias: RequestHandler = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error occurred setting bias" });
+  }
+}
+
+export const getDescription: RequestHandler = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+      return;
+    }
+    const paramsValidation = OrgIdValidation.safeParse(req.params);
+    if (!paramsValidation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: paramsValidation.error,
+      });
+      return;
+    }
+    const { orgId } = paramsValidation.data;
+    const userMembership = await prisma.membership.findFirst({
+      where: {
+        userId: user.id,
+        orgId: orgId.toString(),
+      },
+      select: {
+        role: true
+      }
+    })
+    const isAuthorized = userMembership?.role === "CREATOR" || userMembership?.role === "ADMIN";
+    if (!isAuthorized) {
+      res.status(403).json({ message: "You are not authorized to fetch the description of this organization" });
+      return;
+    }
+    const description = await prisma.organization.findUnique({
+      where: {
+        id: orgId.toString()
+      },
+      select: {
+        description: true
+      }
+    })
+    if (!description) {
+      res.status(404).json({ message: "Description not found for this organization" });
+      return;
+    }
+    res.status(200).json({ description: description.description });
+  } catch (error) {
+    console.error("Error occurred updating description", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred updating description" });
+  }
+}
+
+export const updateDescription: RequestHandler = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+      return;
+    }
+    const validation = updateDescriptionValidation.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: validation.error,
+      });
+      return;
+    }
+    const paramsValidation = OrgIdValidation.safeParse(req.params);
+    if (!paramsValidation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: paramsValidation.error,
+      });
+      return;
+    }
+    const { description } = validation.data;
+    const { orgId } = paramsValidation.data;
+    const userMembership = await prisma.membership.findFirst({
+      where: {
+        userId: user.id,
+        orgId: orgId.toString(),
+      },
+      select: {
+        role: true
+      }
+    })
+    const isAuthorized = userMembership?.role === "CREATOR" || userMembership?.role === "ADMIN";
+    if (!isAuthorized) {
+      res.status(403).json({ message: "You are not authorized to update the description of this organization" });
+      return;
+    }
+    await prisma.organization.update({
+      where: {
+        id: orgId.toString()
+      },
+      data: {
+        description
+      }
+    })
+    res.status(200).json({ message: "Description updated for organization" });
+  } catch (error) {
+    console.error("Error occurred updating description", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred updating description" });
+  }
+}
+
+export const checkIfAdmin: RequestHandler = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+      return;
+    }
+    const paramsValidation = OrgIdValidation.safeParse(req.params);
+    if (!paramsValidation.success) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: paramsValidation.error,
+      });
+      return;
+    }
+    const { orgId } = paramsValidation.data;
+    const userMembership = await prisma.membership.findFirst({
+      where: {
+        orgId: orgId,
+        userId: user.id,
+      },
+      select: {
+        role: true
+      }
+    })
+    if (!userMembership) {
+      res.status(404).json({ message: "You are not a member of this organization" });
+      return;
+    }
+    const isAuthorized = userMembership?.role === "CREATOR" || userMembership?.role === "ADMIN";
+    res.status(200).json({ isAuthorized });
+  } catch (error) {
+    console.error("Error occurred checking if user is admin", error);
+    res
+      .status(500)
+      .json({ message: "Error occurred checking if user is admin" });
   }
 }
