@@ -143,6 +143,7 @@ const EditDescription: FC<EditDescriptionProps> = ({ token }) => {
                                 />
                             </div>
                             <Button
+                                className="w-full"
                                 type="submit"
                                 disabled={editDescription.isPending}
                                 variant={"arbiter"}

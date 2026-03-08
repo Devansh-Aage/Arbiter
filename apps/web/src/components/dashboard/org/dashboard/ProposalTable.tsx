@@ -1,12 +1,46 @@
-import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { FC } from "react"
+import { Link, useNavigate, useParams } from "react-router";
 
-interface ProposalTableProps {
+interface ProposalData {
+    id: string;
+    title: string;
+    proposalStatus: string;
+    deadline: string;
+    createdAt: string;
+    _count: {
+        votes: number;
+    }
 }
 
-const ProposalTable: FC<ProposalTableProps> = ({ }) => {
+interface ProposalTableProps {
+    proposals: ProposalData[];
+}
+
+const getTimeline = (status: string, deadline: string) => {
+    const deadlineDate = new Date(deadline)
+    const now = new Date()
+
+    if (status === "UPCOMING" || status === "ACTIVE") {
+        const diffMs = deadlineDate.getTime() - now.getTime()
+        const diffHrs = Math.max(Math.floor(diffMs / (1000 * 60 * 60)), 0)
+
+        return `Will end in ${diffHrs} hrs`
+    }
+
+    if (status === "CLOSED" || status === "COMPLETED") {
+        return `Ended at ${deadlineDate.toLocaleString()}`
+    }
+
+    return "-"
+}
+
+const ProposalTable: FC<ProposalTableProps> = ({ proposals }) => {
+    const navigate = useNavigate();
+    const params = useParams();
+    const orgId = params.orgId as string;
     return (
-        <Table className="w-full">
+        <Table className="w-full text-lg">
             <TableHeader>
                 <TableRow>
                     <TableHead>Title</TableHead>
@@ -15,6 +49,19 @@ const ProposalTable: FC<ProposalTableProps> = ({ }) => {
                     <TableHead>Timeline</TableHead>
                 </TableRow>
             </TableHeader>
+
+            <TableBody>
+                {proposals.map((proposal) => (
+                    <TableRow className="cursor-pointer" onClick={() => navigate(`/dashboard/orgs/${orgId}/dashboard/${proposal.id}`)} key={proposal.id}>
+                        <TableCell>{proposal.title}</TableCell>
+                        <TableCell>{proposal.proposalStatus}</TableCell>
+                        <TableCell>{proposal._count.votes}</TableCell>
+                        <TableCell>
+                            {getTimeline(proposal.proposalStatus, proposal.deadline)}
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
         </Table>
     )
 }

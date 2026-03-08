@@ -12,6 +12,17 @@ import { useGetAccessToken } from "@coinbase/cdp-hooks";
 interface OrgDashboardProps {
 }
 
+interface ProposalData {
+    id: string;
+    title: string;
+    proposalStatus: string;
+    deadline: string;
+    createdAt: string;
+    _count: {
+        votes: number;
+    }
+}
+
 const OrgDashboard: FC<OrgDashboardProps> = ({ }) => {
 
     let params = useParams();
@@ -29,6 +40,19 @@ const OrgDashboard: FC<OrgDashboardProps> = ({ }) => {
         queryKey: ["org", params.orgId, "bias"],
         queryFn: async (): Promise<{ bias: string }> => {
             const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}org/${params.orgId}/bias`, {
+                headers: {
+                    "authToken": token
+                }
+            })
+            return res.data;
+        },
+        enabled: !!token
+    })
+
+    const { data: proposalsData, isSuccess: isProposalsSuccess } = useQuery({
+        queryKey: ["org", params.orgId, "proposals"],
+        queryFn: async (): Promise<{ proposals: ProposalData[] }> => {
+            const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}proposal/${params.orgId}`, {
                 headers: {
                     "authToken": token
                 }
@@ -67,7 +91,7 @@ const OrgDashboard: FC<OrgDashboardProps> = ({ }) => {
                 </div>
                 <div className="mt-4">
                     {
-                        !isSuccess ?
+                        !isProposalsSuccess ?
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -89,7 +113,7 @@ const OrgDashboard: FC<OrgDashboardProps> = ({ }) => {
                                 </TableBody>
                             </Table>
                             :
-                            <ProposalTable />
+                            <ProposalTable proposals={proposalsData.proposals} />
                     }
                 </div>
             </div>

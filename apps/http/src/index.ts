@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes";
 import orgRoutes from "./routes/orgRoutes";
 import discussionRoutes from "./routes/discussionRoutes";
+import proposalRoutes from "./routes/proposalRoutes";
 import { appIsLoggedIn } from "./middleware/app-isLoggedIn";
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/org", orgRoutes);
 app.use("/api/discussion", discussionRoutes);
+app.use("/api/proposal", proposalRoutes);
 
 app.get("/api/app/auth", appIsLoggedIn);
 

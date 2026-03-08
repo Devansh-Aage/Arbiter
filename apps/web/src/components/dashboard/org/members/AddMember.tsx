@@ -117,7 +117,7 @@ const AddMember: FC<AddMemberProps> = ({ token }) => {
                             placeholder="Enter member email"
                         />
                     </div>
-                    <Button type="submit" disabled={isSubmitting} variant={"arbiter"}>
+                    <Button className="w-full" type="submit" disabled={isSubmitting} variant={"arbiter"}>
                         {isSubmitting ? "Adding..." : "Add"}
                     </Button>
                 </form>

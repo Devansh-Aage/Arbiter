@@ -53,6 +53,10 @@ export const OrgIdValidation = z.object({
   orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
 });
 
+export const ProposalIdValidation = z.object({
+  proposalId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Proposal ObjectId"),
+});
+
 export const emailValidation = z.object({
   email: z.email("Please enter a valid Email"),
 });

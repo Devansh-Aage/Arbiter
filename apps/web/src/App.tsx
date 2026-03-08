@@ -9,6 +9,7 @@ import OrgLayout from "./pages/protected/org/OrgLayout";
 import Layout from "./pages/protected/Layout";
 import OrgMembers from "./pages/protected/org/OrgMembers";
 import OrgSettings from "./pages/protected/org/OrgSettings";
+import Proposal from "./pages/protected/org/proposal/Proposal";
 
 function App() {
   return (
@@ -23,7 +24,10 @@ function App() {
             <Route path="orgs">
               <Route index element={<Organizations />} />
               <Route element={<OrgLayout />} >
-                <Route path=":orgId/dashboard" element={<OrgDashboard />} />
+                <Route path=":orgId/dashboard">
+                  <Route index element={<OrgDashboard />} />
+                  <Route path=":proposalId" element={<Proposal />} />
+                </Route>
                 <Route path=":orgId/members" element={<OrgMembers />} />
                 <Route path=":orgId/settings" element={<OrgSettings />} />
               </Route>

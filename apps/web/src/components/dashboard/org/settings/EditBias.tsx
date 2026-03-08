@@ -149,6 +149,7 @@ const EditBias: FC<EditBiasProps> = ({ token }) => {
                 type="submit"
                 disabled={editBias.isPending}
                 variant={"arbiter"}
+                className="w-full"
               >
                 {editBias.isPending ? "Editing..." : "Edit"}
               </Button>
