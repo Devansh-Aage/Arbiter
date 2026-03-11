@@ -43,6 +43,8 @@ io.on("connection", async (socket: CustomSocket) => {
     if (proposalIds?.length > 0) {
         proposalIds.forEach((proposalId) => {
             socket.join(`proposal:${proposalId}`);
+            console.log(`User ${userId} joined proposal ${proposalId}`);
+
         });
     }
 

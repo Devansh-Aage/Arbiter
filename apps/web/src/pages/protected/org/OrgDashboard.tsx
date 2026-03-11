@@ -52,7 +52,7 @@ const OrgDashboard: FC<OrgDashboardProps> = ({ }) => {
     const { data: proposalsData, isSuccess: isProposalsSuccess } = useQuery({
         queryKey: ["org", params.orgId, "proposals"],
         queryFn: async (): Promise<{ proposals: ProposalData[] }> => {
-            const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}proposal/${params.orgId}`, {
+            const res = await axios.get(`${import.meta.env.VITE_HTTP_URL}proposal/org/${params.orgId}`, {
                 headers: {
                     "authToken": token
                 }

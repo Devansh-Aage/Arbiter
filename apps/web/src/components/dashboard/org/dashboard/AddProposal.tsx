@@ -43,7 +43,8 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [deadline, setDeadline] = useState<string | undefined>(undefined);
   const [choices, setChoices] = useState<string[]>([""]);
-  const [predictionLoading, setPredictionLoading] = useState(false)
+  const [predictionLoading, setPredictionLoading] = useState(false);
+  const [proposalLoading, setProposalLoading] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -67,6 +68,7 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
 
   const handleAddProposal = useMutation({
     mutationFn: async (data: FormData) => {
+      setProposalLoading(true);
       if (!file) {
         toast.error("Please upload a proposal file")
         return;
@@ -77,6 +79,10 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
       }
       if (!deadline) {
         toast.error("Deadline not found")
+        return
+      }
+      if (choices.length < 2) {
+        toast.error("Add more choices!")
         return
       }
 
@@ -110,7 +116,8 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["org", params.orgId, "bias"] })
+      queryClient.invalidateQueries({ queryKey: ["org", params.orgId, "proposals"] })
+      setProposalLoading(false);
     },
     onSuccess: () => {
       reset();
@@ -261,10 +268,10 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
             </Field>
           </FieldSet>
           <div className="flex items-center gap-3">
-            <Button className="flex-1" type="submit" disabled={isSubmitting || predictionLoading} variant={"arbiter"}>
-              {isSubmitting ? "Adding..." : "Add"}
+            <Button className="flex-1" type="submit" disabled={proposalLoading || predictionLoading} variant={"arbiter"}>
+              {proposalLoading ? "Adding..." : "Add"}
             </Button>
-            <Button className="flex-1" onClick={handlePredictPassingProbability} disabled={isSubmitting || predictionLoading} variant={"arbiter"}>
+            <Button className="flex-1" onClick={handlePredictPassingProbability} disabled={proposalLoading || predictionLoading} variant={"arbiter"}>
               {predictionLoading ? "Predicting..." : "Predict passing probability"}
             </Button>
           </div>

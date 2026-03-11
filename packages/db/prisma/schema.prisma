@@ -15,10 +15,10 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   wallet   String?
   username String?
-  email    String    @unique
+  email    String  @unique
 
   memberships     Membership[] //one to many
   proposaldata    ProposalData[] //one to many
@@ -74,11 +74,12 @@ model Proposal {
   title          String
   mediaUrl       String
   deadline       DateTime
-  summary        String
+  summary        Json           // Now stored as JSON object: { text: string, accept: string[], reject: string[] }
   proposalStatus ProposalStatus @default(UPCOMING)
   orgId          String         @db.ObjectId
   voterRoot      String? //semaphore group root
   type           ProposalType   @default(TRANSPARENT)
+  startTime      DateTime?
 
   org             Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade) //one to many
   proposaldata    ProposalData[] //one to many

@@ -53,3 +53,22 @@ export interface OrgHeaderData {
     numProposals: number;
     numVotes: number;
 }
+
+export interface ProposalPageData {
+           id: string;
+        title: string;
+        mediaUrl: string;
+        deadline: string;
+        summary: string;
+        proposalStatus: string;
+        orgId: string;
+        voterRoot: string | null;
+        type: string;
+        startTime: string | null;
+        createdAt: string;
+        proposalChoices: {
+            id: string;
+            text: string;
+            votes: number;
+        }[];
+}

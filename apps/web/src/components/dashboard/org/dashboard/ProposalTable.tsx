@@ -52,7 +52,7 @@ const ProposalTable: FC<ProposalTableProps> = ({ proposals }) => {
 
             <TableBody>
                 {proposals.map((proposal) => (
-                    <TableRow className="cursor-pointer" onClick={() => navigate(`/dashboard/orgs/${orgId}/dashboard/${proposal.id}`)} key={proposal.id}>
+                    <TableRow className="cursor-pointer" onClick={() => navigate(`/dashboard/orgs/${orgId}/dashboard/${proposal.id}/overview`)} key={proposal.id}>
                         <TableCell>{proposal.title}</TableCell>
                         <TableCell>{proposal.proposalStatus}</TableCell>
                         <TableCell>{proposal._count.votes}</TableCell>

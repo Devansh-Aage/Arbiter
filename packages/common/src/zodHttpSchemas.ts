@@ -16,7 +16,6 @@ export const createOrgValidation = z.object({
   description: z
     .string()
     .min(10, "The description must be at least 10 characters long")
-    .max(1500, "Description too long!"),
 });
 export const createOrgClientValidation = z.object({
   name: z
@@ -26,7 +25,6 @@ export const createOrgClientValidation = z.object({
   description: z
     .string()
     .min(10, "The description must be at least 50 characters long")
-    .max(1500, "Description too long!"),
 });
 
 export const getOrgByIdValidation = z.object({
@@ -80,11 +78,11 @@ export const getDiscussionsValidation = z.object({
 
 export const setBiasValidation = z.object({
   orgId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Organization ObjectId"),
-  bias: z.string().min(1, "Bias must be at least 1 character").max(2000, "Bias must be less than 2000 characters"),
+  bias: z.string().min(1, "Bias must be at least 1 character"),
 })
 
 export const setBiasClientValidation = z.object({
-  bias: z.string().min(1, "Interests must be at least 1 character").max(2000, "Interests must be less than 2000 characters"),
+  bias: z.string().min(1, "Interests must be at least 1 character")
 })
 
 export const createProposalValidation = z.object({

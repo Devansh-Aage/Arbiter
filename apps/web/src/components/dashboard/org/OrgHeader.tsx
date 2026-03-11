@@ -14,7 +14,7 @@ interface OrgHeaderProps {
 
 const OrgHeader: FC<OrgHeaderProps> = ({ org, numMemberships, numProposals, numVotes }) => {
     return (
-        <div className="w-full py-3 px-5 flex flex-col gap-2">
+        <div className="w-full py-3 px-5 flex flex-col gap-2 max-h-[100px]">
             <p className="text-4xl font-bold">
                 {org.name}
             </p>

@@ -10,6 +10,10 @@ import Layout from "./pages/protected/Layout";
 import OrgMembers from "./pages/protected/org/OrgMembers";
 import OrgSettings from "./pages/protected/org/OrgSettings";
 import Proposal from "./pages/protected/org/proposal/Proposal";
+import Overview from "./pages/protected/org/proposal/Overview";
+import Vote from "./pages/protected/org/proposal/Vote";
+import Chat from "./pages/protected/org/proposal/Chat";
+import Settings from "./pages/protected/org/proposal/Settings";
 
 function App() {
   return (
@@ -26,7 +30,12 @@ function App() {
               <Route element={<OrgLayout />} >
                 <Route path=":orgId/dashboard">
                   <Route index element={<OrgDashboard />} />
-                  <Route path=":proposalId" element={<Proposal />} />
+                  <Route path=":proposalId" element={<Proposal />} >
+                    <Route index path="overview" element={<Overview />} />
+                    <Route path="vote" element={<Vote />} />
+                    <Route path="chat" element={<Chat />} />
+                    <Route path="settings" element={<Settings />} />
+                  </Route>
                 </Route>
                 <Route path=":orgId/members" element={<OrgMembers />} />
                 <Route path=":orgId/settings" element={<OrgSettings />} />
