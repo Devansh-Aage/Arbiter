@@ -95,3 +95,8 @@ export const updateDescriptionValidation = z.object({
     .min(10, "The description must be at least 50 characters long")
     .max(1500, "Description too long!"),
 })
+
+export const addChatMessageValidation = z.object({
+  text: z.string().min(1, "Text must be at least 1 character").max(5000, "Text must be less than 5000 characters"),
+  proposalId: z.string().refine((id) => ObjectId.isValid(id), "Invalid Proposal ObjectId"),
+})

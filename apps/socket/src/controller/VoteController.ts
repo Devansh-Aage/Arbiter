@@ -22,7 +22,7 @@ export const addVote = async (socket: Socket, rawPayload: addVotePayload) => {
             return;
         }
         const userId = user.id;
-        const { choiceId, proposalId, signature, hash } = dataValidation.data;
+        const { choiceId, proposalId, signature, hash, timestamp } = dataValidation.data;
 
         const proposal = await prisma.proposal.findFirst({
             where: {
@@ -65,7 +65,8 @@ export const addVote = async (socket: Socket, rawPayload: addVotePayload) => {
                 userId,
                 signature,
                 voteValue,
-                hash
+                hash,
+                timestamp
             }
         })
         socket.to(`proposal:${proposalId}`).emit(VOTE_ADDED_EVENT, vote)

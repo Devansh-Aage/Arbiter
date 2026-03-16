@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { FC } from "react"
-import { Link, useNavigate, useParams } from "react-router";
+import {  useNavigate, useParams } from "react-router";
 
 interface ProposalData {
     id: string;

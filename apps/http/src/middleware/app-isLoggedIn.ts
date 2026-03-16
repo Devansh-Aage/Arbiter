@@ -60,7 +60,7 @@ export const appIsLoggedIn: RequestHandler = async (req, res) => {
             user = await prisma.user.create({
                 data: {
                     email,
-                    wallet: endUser.evmSmartAccountObjects[0].address,
+                    wallet: endUser.evmAccountObjects[0].address,
                 }
             })
         }
@@ -71,7 +71,7 @@ export const appIsLoggedIn: RequestHandler = async (req, res) => {
                     email
                 },
                 data: {
-                    wallet: endUser.evmSmartAccountObjects[0].address,
+                    wallet: endUser.evmAccountObjects[0].address,
                 }
             })
         }

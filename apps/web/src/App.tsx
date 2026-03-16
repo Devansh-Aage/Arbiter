@@ -14,6 +14,8 @@ import Overview from "./pages/protected/org/proposal/Overview";
 import Vote from "./pages/protected/org/proposal/Vote";
 import Chat from "./pages/protected/org/proposal/Chat";
 import Settings from "./pages/protected/org/proposal/Settings";
+import Verify from "./pages/protected/org/proposal/Verify";
+import Profile from "./pages/protected/profile/Profile";
 
 function App() {
   return (
@@ -35,12 +37,14 @@ function App() {
                     <Route path="vote" element={<Vote />} />
                     <Route path="chat" element={<Chat />} />
                     <Route path="settings" element={<Settings />} />
+                    <Route path="verify" element={<Verify />} />
                   </Route>
                 </Route>
                 <Route path=":orgId/members" element={<OrgMembers />} />
                 <Route path=":orgId/settings" element={<OrgSettings />} />
               </Route>
             </Route>
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Route>
         <Route path='*' element={<Navigate to="/auth/login" replace />} />

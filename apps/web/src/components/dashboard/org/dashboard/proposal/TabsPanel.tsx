@@ -28,7 +28,7 @@ const TabsPanel: FC<TabsPanelProps> = ({ }) => {
         <div className="w-full font-semibold flex items-center gap-4 border-b border-zinc-800">
             {
                 paths.map((p) => (
-                    <NavLink to={p.path} className={({ isActive }) => `relative px-4 py-2 flex  text-xl items-center justify-center hover:text-white rounded-md ${isActive ? "text-white underline underline-offset-4" : " text-slate-300"}`}>
+                    <NavLink to={p.path} className={({ isActive }) => `relative px-4 py-2 flex  text-xl items-center justify-center hover:text-foreground rounded-md ${isActive ? "text-foreground underline underline-offset-4" : " text-foreground/60"}`}>
                         {p.title}
                     </NavLink>
                 )

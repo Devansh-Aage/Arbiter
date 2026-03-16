@@ -1,4 +1,4 @@
-import { OrgIdValidation, ProposalIdValidation } from "@arbiter/common";
+import { OrgIdValidation, ProposalIdValidation, addChatMessageValidation } from "@arbiter/common";
 import { prisma } from "@arbiter/db/src/client";
 import { RequestHandler } from "express";
 
@@ -108,6 +108,21 @@ export const getProposalById: RequestHandler = async (req, res) => {
             res.status(401).json({ message: "You are not authorized to access this proposal" });
             return;
         }
+
+        const proposalData = await prisma.proposalData.findFirst({
+            where: {
+                userId: user.id,
+                proposalId: proposalId
+            },
+            select: {
+                vote: true,
+                summary: true
+            }
+        })
+        if (!proposalData) {
+            res.status(404).json({ message: "Proposal data not found" });
+            return;
+        }
         const formattedProposal = {
             ...proposal,
             proposalChoices: proposal.proposalChoices.map((choice) => ({
@@ -115,6 +130,10 @@ export const getProposalById: RequestHandler = async (req, res) => {
                 text: choice.value,
                 votes: choice._count.votes,
             })),
+            proposalData: {
+                vote: proposalData.vote,
+                summary: proposalData.summary
+            }
         };
         res.status(200).json({ proposal: formattedProposal });
     } catch (error) {
@@ -297,11 +316,14 @@ export const getVoteTableData: RequestHandler = async (req, res) => {
         })
         const voteData = votes.map((vote) => ({
             id: vote.id,
+            choiceId: vote.choiceId,
             choice: vote.choice.value,
             voteValue: vote.voteValue,
             votedAt: vote.votedAt,
             user: vote.user.email,
-            wallet: vote.user.wallet
+            wallet: vote.user.wallet,
+            timestamp: vote.timestamp,
+            signature: vote.signature
         }))
         res.status(200).json({ voteData });
     } catch (error) {
@@ -340,5 +362,127 @@ export const getUserChoice: RequestHandler = async (req, res) => {
         res
             .status(500)
             .json({ message: "Error occurred getting user choice" });
+    }
+}
+
+export const addChatMessage: RequestHandler = async (req, res) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            res.status(404).json({ message: "User not found!" });
+            return;
+        }
+        const paramsValidation = addChatMessageValidation.safeParse(req.body);
+        if (!paramsValidation.success) {
+            res.status(400).json({
+                message: "Validation failed",
+                errors: paramsValidation.error,
+            });
+            return;
+        }
+        const { proposalId, text } = paramsValidation.data;
+
+        const orgId = await prisma.proposal.findUnique({
+            where: {
+                id: proposalId
+            },
+            select: {
+                orgId: true
+            }
+        })
+        if (!orgId) {
+            res.status(404).json({ message: "Proposal not found" });
+            return;
+        }
+        const userMembership = await prisma.membership.findFirst({
+            where: {
+                userId: user.id,
+                orgId: orgId.orgId,
+            },
+            select: {
+                role: true
+            }
+        })
+        if (!userMembership) {
+            res.status(401).json({ message: "You are not authorized to access this proposal" });
+            return;
+        }
+
+        await prisma.message.create({
+            data: {
+                text,
+                author: "USER",
+                proposalId,
+                userId: user.id,
+            }
+        })
+        res.status(200).json({ message: "Chat message added successfully" });
+    } catch (error) {
+        console.error("Error occurred adding chat message", error);
+        res
+            .status(500)
+            .json({ message: "Error occurred adding chat message" });
+    }
+}
+
+export const getChatMessages: RequestHandler = async (req, res) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            res.status(404).json({ message: "User not found!" });
+            return;
+        }
+        const paramsValidation = ProposalIdValidation.safeParse(req.params);
+        if (!paramsValidation.success) {
+            res.status(400).json({
+                message: "Validation failed",
+                errors: paramsValidation.error,
+            });
+            return;
+        }
+        const { proposalId } = paramsValidation.data;
+
+        const orgId = await prisma.proposal.findUnique({
+            where: {
+                id: proposalId
+            },
+            select: {
+                orgId: true
+            }
+        })
+        if (!orgId) {
+            res.status(404).json({ message: "Proposal not found" });
+            return;
+        }
+        const userMembership = await prisma.membership.findFirst({
+            where: {
+                userId: user.id,
+                orgId: orgId.orgId,
+            },
+            select: {
+                role: true
+            }
+        })
+        if (!userMembership) {
+            res.status(401).json({ message: "You are not authorized to access this proposal" });
+            return;
+        }
+
+        const messages = await prisma.message.findMany({
+            where: {
+                proposalId,
+                userId: user.id,
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        })
+
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error("Error occurred adding chat message", error);
+        res
+            .status(500)
+            .json({ message: "Error occurred adding chat message" });
     }
 }

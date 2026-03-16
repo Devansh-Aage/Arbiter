@@ -51,7 +51,6 @@ const Sidebar: FC<SidebarProps> = ({ }) => {
                 <div className='flex flex-col gap-3 '>
                     <SideLink to="/dashboard/orgs" icon={<Building size={20} />} text='Organizations' />
                     <SideLink to="/dashboard/profile" icon={<User size={20} />} text='Profile' />
-                    <SideLink to="/dashboard/settings" icon={<Settings size={20} />} text='Settings' />
                 </div>
             </div>
             <div className='pb-5 flex flex-col gap-5 justify-center items-center'>

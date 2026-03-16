@@ -74,7 +74,7 @@ model Proposal {
   title          String
   mediaUrl       String
   deadline       DateTime
-  summary        Json           // Now stored as JSON object: { text: string, accept: string[], reject: string[] }
+  summary        Json // Now stored as JSON object: { text: string, accept: string[], reject: string[] }
   proposalStatus ProposalStatus @default(UPCOMING)
   orgId          String         @db.ObjectId
   voterRoot      String? //semaphore group root
@@ -140,6 +140,7 @@ model Vote {
   proposalId String @db.ObjectId
   choiceId   String @db.ObjectId
   userId     String @db.ObjectId
+  timestamp  Int
 
   signature String
   hash      String?

@@ -55,20 +55,40 @@ export interface OrgHeaderData {
 }
 
 export interface ProposalPageData {
-           id: string;
-        title: string;
-        mediaUrl: string;
-        deadline: string;
-        summary: string;
-        proposalStatus: string;
-        orgId: string;
-        voterRoot: string | null;
-        type: string;
-        startTime: string | null;
-        createdAt: string;
-        proposalChoices: {
-            id: string;
-            text: string;
-            votes: number;
-        }[];
+    id: string;
+    title: string;
+    mediaUrl: string;
+    deadline: string;
+    summary: {
+        text: string;
+        accept: string[];
+        reject: string[];
+    };
+    proposalData: {
+        vote: string;
+        summary: string
+    };
+    proposalStatus: string;
+    orgId: string;
+    voterRoot: string | null;
+    type: string;
+    startTime: string | null;
+    createdAt: string;
+    proposalChoices: {
+        id: string;
+        text: string;
+        votes: number;
+    }[];
+}
+
+export interface VoteTable {
+    id: string,
+    choiceId: string,
+    choice: string,
+    voteValue: number,
+    votedAt: Date,
+    user: string,
+    wallet: string,
+    timestamp: number,
+    signature: string
 }

@@ -2,13 +2,14 @@ import { useGetAccessToken } from "@coinbase/cdp-hooks"
 import socket, { connectSocketWithToken } from "@/lib/socket"
 import { useEffect, type FC, useState } from "react"
 import { Outlet, useParams } from "react-router"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { ProposalPageData } from "@arbiter/db/src/types"
 import axios from "axios"
 import InfoPanel from "@/components/dashboard/org/dashboard/proposal/InfoPanel"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Vote } from "@arbiter/db/generated/prisma/client"
 import TabsPanel from "@/components/dashboard/org/dashboard/proposal/TabsPanel"
+import { ADD_VOTE_RES, VOTE_ADDED_EVENT } from "@arbiter/common/src/eventConstants"
 
 interface ProposalProps {
 }
@@ -18,6 +19,7 @@ const Proposal: FC<ProposalProps> = ({ }) => {
     const [token, setToken] = useState<string | null>(null)
     const params = useParams()
     const { proposalId } = params
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         (async () => {
@@ -33,6 +35,19 @@ const Proposal: FC<ProposalProps> = ({ }) => {
             socket.disconnect()
         })
     }, [getAccessToken])
+
+    useEffect(() => {
+        const newVoteHandler = () => {
+            console.log("New vote added");
+
+            queryClient.invalidateQueries({ queryKey: ["proposal", proposalId, "overview"] })
+            queryClient.invalidateQueries({ queryKey: ["proposal", proposalId, "vote"] })
+        };
+        socket.on(VOTE_ADDED_EVENT, newVoteHandler)
+        return (() => {
+            socket.off(VOTE_ADDED_EVENT, newVoteHandler)
+        })
+    }, [])
 
     const { data: proposalData, isSuccess: isProposalSuccess } = useQuery({
         queryKey: ["proposal", proposalId, "overview"],
@@ -60,9 +75,9 @@ const Proposal: FC<ProposalProps> = ({ }) => {
     })
 
     return (
-        <div className="w-full p-4 flex">
+        <div className="w-full p-4 flex max-h-[calc(100vh-120px)]">
             <div className="w-[70%]">
-                {/* <p className="text-foreground text-xl font-bold">{proposalData?.proposal.proposal.title}</p> */}
+                <p className="text-foreground text-2xl font-bold">{proposalData?.proposal.title}</p>
                 <TabsPanel />
                 <Outlet />
             </div>
