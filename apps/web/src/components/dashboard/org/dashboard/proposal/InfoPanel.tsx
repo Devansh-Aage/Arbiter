@@ -43,7 +43,8 @@ const InfoPanel: FC<InfoPanelProps> = ({ proposalData, userChoice }) => {
         text: choice.text,
         votes: choice.votes,
     }))
-    const totalVotes = proposalChoices.reduce((acc, choice) => acc + choice.votes, 0)
+    const votes = proposalData.votes;
+    const totalVotes = votes.totalVotes
 
     useEffect(() => {
         const handler = (_data: string) => {
@@ -92,7 +93,8 @@ const InfoPanel: FC<InfoPanelProps> = ({ proposalData, userChoice }) => {
 
                 <div className="mt-3 space-y-2">
                     {proposalChoices.map((choice) => {
-                        const percentage = totalVotes === 0 ? 0 : Math.round((choice.votes / totalVotes) * 100)
+                        const voteValue = votes.choices.find((vote) => vote.id === choice.id)?.value ?? 0;
+                        const percentage = totalVotes === 0 ? 0 : Math.round((voteValue / totalVotes) * 100)
 
                         return (
                             <Button
@@ -104,7 +106,7 @@ const InfoPanel: FC<InfoPanelProps> = ({ proposalData, userChoice }) => {
                             >
                                 <span className="font-medium">{choice.text}</span>
                                 <span className="text-sm text-foreground">
-                                    {choice.votes} votes ({percentage}%)
+                                    ({percentage}%)
                                 </span>
                             </Button>
                         )

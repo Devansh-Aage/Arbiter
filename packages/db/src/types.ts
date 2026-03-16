@@ -79,6 +79,13 @@ export interface ProposalPageData {
         text: string;
         votes: number;
     }[];
+    votes: {
+        totalVotes: number,
+        choices: {
+            id: string,
+            value: number
+        }[]
+    }
 }
 
 export interface VoteTable {

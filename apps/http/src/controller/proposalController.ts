@@ -123,16 +123,32 @@ export const getProposalById: RequestHandler = async (req, res) => {
             res.status(404).json({ message: "Proposal data not found" });
             return;
         }
+        const votes = await prisma.vote.groupBy({
+            by: ["choiceId"],
+            _sum: {
+                voteValue: true
+            }
+        })
         const formattedProposal = {
             ...proposal,
             proposalChoices: proposal.proposalChoices.map((choice) => ({
                 id: choice.id,
                 text: choice.value,
                 votes: choice._count.votes,
+
             })),
             proposalData: {
                 vote: proposalData.vote,
                 summary: proposalData.summary
+            },
+            votes: {
+                totalVotes: votes.reduce((acc, vote) => acc + (vote?._sum.voteValue ?? 0), 0),
+                choices: votes.map((vote) => {
+                    return {
+                        id: vote.choiceId,
+                        value: vote._sum.voteValue
+                    }
+                })
             }
         };
         res.status(200).json({ proposal: formattedProposal });

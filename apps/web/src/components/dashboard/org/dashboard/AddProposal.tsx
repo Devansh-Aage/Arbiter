@@ -29,6 +29,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import axios, { AxiosError } from "axios";
 import pinata from "@/lib/pinata";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AddProposalProps { token: string }
 
@@ -45,6 +46,9 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
   const [choices, setChoices] = useState<string[]>([""]);
   const [predictionLoading, setPredictionLoading] = useState(false);
   const [proposalLoading, setProposalLoading] = useState(false);
+  const [predictionSuccess, setPredictionSuccess] = useState(false)
+  const [acceptanceChance, setAcceptanceChance] = useState(0)
+  const [recommendations, setRecommendations] = useState<string[]>([])
   const queryClient = useQueryClient();
 
   const {
@@ -52,7 +56,7 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
     handleSubmit,
     reset,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(createProposalValidation),
   });
@@ -151,7 +155,9 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
         headers: { "Content-Type": "multipart/form-data" }
       })
       const response = res.data
-      console.log(response);
+      setPredictionSuccess(response.status === "success")
+      setAcceptanceChance(response.evaluation.overall_acceptance_chance);
+      setRecommendations(response.evaluation.recommendations);
     } catch (error) {
       console.error("Failed to predict passing probability: ", error)
       toast.error("An unexpected error occurred!")
@@ -276,6 +282,21 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
             </Button>
           </div>
         </form>
+        {
+          predictionSuccess && (
+            <ScrollArea className="h-[200px]">
+              <div>
+                <h3><span className="font-bold">Acceptance Chance:</span> {acceptanceChance}</h3>
+                <ul className="list-disc list-inside">
+                  <p className="font-bold">Recommendations:</p>
+                  {recommendations.map((recommendation, index) => (
+                    <li key={index}> {recommendation}</li>
+                  ))}
+                </ul>
+              </div>
+            </ScrollArea>
+          )
+        }
       </DialogContent>
     </Dialog>
   );
