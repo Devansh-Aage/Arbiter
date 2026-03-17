@@ -16,6 +16,7 @@ import Chat from "./pages/protected/org/proposal/Chat";
 import Settings from "./pages/protected/org/proposal/Settings";
 import Verify from "./pages/protected/org/proposal/Verify";
 import Profile from "./pages/protected/profile/Profile";
+import File from "./pages/protected/org/proposal/File";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
                     <Route path="chat" element={<Chat />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="verify" element={<Verify />} />
+                    <Route path="file" element={<File />} />
                   </Route>
                 </Route>
                 <Route path=":orgId/members" element={<OrgMembers />} />

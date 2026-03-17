@@ -1,0 +1,23 @@
+{
+  "name": "cron",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --watch src --ext ts --exec \"ts-node src/index.ts\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.1",
+  "dependencies": {
+    "express": "^5.2.1",
+    "node-cron": "^4.2.1",
+    "@arbiter/common": "workspace:^1.0.0",
+    "@arbiter/db": "workspace:^1.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}

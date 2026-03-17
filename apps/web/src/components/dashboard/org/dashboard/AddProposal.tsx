@@ -286,7 +286,7 @@ const AddProposal: FC<AddProposalProps> = ({ token }) => {
           predictionSuccess && (
             <ScrollArea className="h-[200px]">
               <div>
-                <h3><span className="font-bold">Acceptance Chance:</span> {acceptanceChance}</h3>
+                <h3><span className="font-bold">Acceptance Chance:</span> {acceptanceChance}%</h3>
                 <ul className="list-disc list-inside">
                   <p className="font-bold">Recommendations:</p>
                   {recommendations.map((recommendation, index) => (

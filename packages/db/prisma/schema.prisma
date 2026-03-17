@@ -126,9 +126,9 @@ model ProposalChoice {
 
   value String
 
-  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
-  votes    Vote[]
-  zkVotes  zkVote[]
+  proposal        Proposal         @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  votes           Vote[]
+  zkVotes         zkVote[]
 
   @@unique([proposalId, value])
   @@index([proposalId])
@@ -178,13 +178,12 @@ model ProposalResult {
   id         String @id @default(auto()) @map("_id") @db.ObjectId
   proposalId String @unique @db.ObjectId
 
-  voteRoot        String //merkle root
   totalVotes      Int
   winningChoiceId String @db.ObjectId
 
   finalizedAt DateTime @default(now())
 
-  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  proposal      Proposal       @relation(fields: [proposalId], references: [id], onDelete: Cascade)
 }
 
 model Message {

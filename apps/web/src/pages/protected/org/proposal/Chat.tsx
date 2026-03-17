@@ -1,6 +1,5 @@
 import MessageInput from "@/components/dashboard/org/dashboard/proposal/chat/MessageInput"
 import Messages from "@/components/dashboard/org/dashboard/proposal/chat/Messages"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { useGetAccessToken } from "@coinbase/cdp-hooks"
 import { useEffect, useState, type FC } from "react"
 import { useParams } from "react-router"

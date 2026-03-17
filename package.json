@@ -6,6 +6,7 @@
     "dev:web": "pnpm --filter web dev",
     "dev:http": "pnpm --filter http dev",
     "dev:socket": "pnpm --filter socket dev",
+    "start:cron": "pnpm --filter cron start",
     "generate": "pnpm --filter @arbiter/db generate",
     "migrate": "pnpm --filter @arbiter/db migrate",
     "push": "pnpm --filter @arbiter/db push",

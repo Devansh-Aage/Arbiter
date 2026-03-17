@@ -127,8 +127,12 @@ export const getProposalById: RequestHandler = async (req, res) => {
             by: ["choiceId"],
             _sum: {
                 voteValue: true
+            },
+            where:{
+                proposalId: proposalId
             }
         })
+
         const formattedProposal = {
             ...proposal,
             proposalChoices: proposal.proposalChoices.map((choice) => ({

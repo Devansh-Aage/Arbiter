@@ -21,6 +21,10 @@ const paths = [
         title: "Settings",
         path: `settings`
     },
+    {
+        title: "File",
+        path: `file`
+    },
 ]
 
 const TabsPanel: FC<TabsPanelProps> = ({ }) => {
