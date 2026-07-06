@@ -1,11 +1,10 @@
 import pinata from "@/lib/pinata"
 import type { ProposalPageData } from "@arbiter/db/src/types"
 import { useGetAccessToken } from "@coinbase/cdp-hooks"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { useState, type FC, useEffect } from "react"
 import { useParams } from "react-router"
-import { Document, Page } from "react-pdf"
 import { Skeleton } from "@/components/ui/skeleton"
 interface FileProps {
 }
