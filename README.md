@@ -4,7 +4,7 @@
 
 Arbiter helps teams, communities, and organizations run structured proposal workflows with accountable voting. Members sign in with Google, receive an EVM smart wallet via Coinbase Developer Platform (CDP), and cast cryptographically signed votes in real time. The companion [ProposalSystem](https://github.com/sidheshsahu/ProposalSystem) AI service evaluates proposals against organizational context, generates summaries, and powers per-proposal chat.
 
-![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)
+![License: Learning Use Only](https://img.shields.io/badge/License-Learning%20Use%20Only-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
 ![pnpm](https://img.shields.io/badge/pnpm-10.28.1-orange)
 ![Turborepo](https://img.shields.io/badge/Turborepo-2.7-blue)
@@ -320,4 +320,4 @@ pnpm studio
 
 ## License
 
-[ISC](LICENSE)
+[Learning Use Only (LUO-1.0)](LICENSE) — personal, non-commercial learning only. Commercial use requires permission from the copyright holder.

@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "SEE LICENSE IN LICENSE",
   "packageManager": "pnpm@10.27.0",
   "dependencies": {
     "@arbiter/db": "workspace:^1.0.0",
