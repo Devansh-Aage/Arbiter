@@ -16,6 +16,19 @@ Arbiter helps teams, communities, and organizations run structured proposal work
 ![Socket.io](https://img.shields.io/badge/Socket.io-4-black)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8)
 
+## Screenshots
+
+Create organizations, manage members, upload proposals, review documents, chat with AI, and cast wallet-verified votes.
+
+| | |
+|:---:|:---:|
+| **Create organization** | **Members & roles** |
+| ![Create organization](docs/Create%20ORG.png) | ![Members and vote weights](docs/Members.png) |
+| **Upload proposal** | **Proposal document** |
+| ![Upload proposal](docs/Create%20Proposal.png) | ![Proposal file viewer](docs/Proposal%20File.png) |
+| **AI proposal chat** | **Vote & verify** |
+| ![RAG chat on a proposal](docs/RAG%20Chat.png) | ![Vote table and verification](docs/Vote.png) |
+
 ---
 
 ## About
